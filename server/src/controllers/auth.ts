@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
-import { IUser } from '../models/users';
-import users from '../db/users';
+import { IUser, UserModel } from '../models/users';
 import bcrypt from 'bcrypt';
 import { Token } from '../services/utils/token';
 
@@ -10,7 +9,7 @@ async function login(req: Request, res: Response) {
   if (!username || !password) {
     return res.status(400).json({ message: 'username or password is missing' });
   } else {
-    const user: IUser | undefined = users.find((item: IUser) => item.userName === username);
+    const user: IUser | null = await UserModel.findOne({ userName: username }).exec();
     
     if (user) {
       const isValidPassword: boolean = await bcrypt.compare(
@@ -24,13 +23,13 @@ async function login(req: Request, res: Response) {
         
         const accessToken: string = new Token({
           userId: user.id,
-          // expirationTime: '1d',
-          expirationTime: '1s',
+          expirationTime: '1d',
+          // expirationTime: '1s',
         }).getNewAccessToken;
         
         const refreshToken: string = new Token({
-          // expirationTime: '30d',
-          expirationTime: '1s',
+          expirationTime: '30d',
+          // expirationTime: '1s',
         }).getNewRefreshToken;
         
         return res

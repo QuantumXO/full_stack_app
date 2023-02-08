@@ -1,5 +1,4 @@
 import { expressjwt, Params as JwtParamsType, UnauthorizedError } from 'express-jwt';
-import process from 'process';
 import { NextFunction, Request, Response } from 'express';
 import jwt, { VerifyErrors } from 'jsonwebtoken';
 import { Params as ExpressUnlessParamsType } from 'express-unless';
