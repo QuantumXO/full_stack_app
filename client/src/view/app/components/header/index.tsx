@@ -40,7 +40,7 @@ export default function Header() {
       );
     } else {
       layout = (
-        <>
+        <div>
           <Link
             href="/login"
             variant="button"
@@ -51,15 +51,15 @@ export default function Header() {
             Login
           </Link>
           <Link
-            href="/login"
+            href="/sign-up"
             variant="button"
             color="#fff"
             underline="none"
             sx={{ my: 1, mx: 1.5 }}
           >
-            Login
+            Sign up
           </Link>
-        </>
+        </div>
       );
     }
     

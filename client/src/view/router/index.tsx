@@ -1,12 +1,13 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import Home from '../home';
 import CMS from '../cms';
-import React, { memo, useEffect } from 'react';
+import React, { memo } from 'react';
 import App from '../app';
 import Login from '../login';
 import { Router as RemixRouter } from '@remix-run/router/dist/router';
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store';
+import SignUp from '../sign-up';
 
 interface IProtectedRoute {
   Component: any;
@@ -15,10 +16,7 @@ interface IProtectedRoute {
 
 const ProtectedRoute = memo((props: IProtectedRoute): JSX.Element => {
   const { Component, redirectPath = '/login' } = props;
-  
-  const isAuthorized: boolean = useSelector((state: RootState) => {
-    return state.common.isAuthorized;
-  });
+  const isAuthorized: boolean = useSelector((state: RootState) => state.common.isAuthorized);
   
   return (
     <>
@@ -35,23 +33,11 @@ const router: RemixRouter = createBrowserRouter([
     path: '/',
     element: <App/>,
     children: [
-      {
-        index: true,
-        element: <Home/>,
-      },
-      {
-        path: '/home',
-        element: <Home/>,
-      },
-      {
-        path: 'cms',
-        element: <ProtectedRoute Component={CMS} />,
-        // element: ProtectedRoute({ Component: CMS, isAuthorized: true }),
-      },
-      {
-        path: 'login',
-        element: <Login />,
-      },
+      { index: true, element: <Home/> },
+      { path: 'home', element: <Home/> },
+      { path: 'cms', element: <ProtectedRoute Component={CMS} /> },
+      { path: 'login', element: <Login /> },
+      { path: 'sign-up', element: <SignUp /> },
     ]
   },
   {

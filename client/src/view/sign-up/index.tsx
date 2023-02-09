@@ -1,12 +1,14 @@
-import { ChangeEvent, ReactElement, SyntheticEvent, useEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, ReactElement, SyntheticEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, setUserData } from '../../store';
 import { axiosInstance } from '../../services';
+import { Typography, Box, TextField, Container, Button, FormControl } from '@mui/material';
 
-interface ILoginData {
+interface IFormData {
   username?: string;
   password?: string;
+  location?: string;
 }
 
 export default function SignUp(): ReactElement {
@@ -15,7 +17,7 @@ export default function SignUp(): ReactElement {
   
   const isAuthorized: boolean = useSelector((state: RootState) => state.common.isAuthorized);
   
-  const [formData, handleFormData] = useState<ILoginData>({});
+  const [formData, handleFormData] = useState<IFormData>({});
   
   useEffect(() => {
     if (isAuthorized) {
@@ -24,8 +26,10 @@ export default function SignUp(): ReactElement {
     }
   }, [isAuthorized]);
   
-  const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>): Promise<void> => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement | HTMLButtonElement>): Promise<void> => {
     e.preventDefault();
+  
+    console.log('e: ', e);
   
     try {
       const res = await axiosInstance.post(
@@ -52,36 +56,84 @@ export default function SignUp(): ReactElement {
     }));
   };
   
+  const onClearForm = (): void => handleFormData({});
+  
   return (
-    <div className="login">
-      SignUp page
-      <br/>
-      <br/>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <input
-            type="text"
+    <Box className="sign-up" width="100%" padding="0 24px">
+      <Typography
+        component="h1"
+        variant="h3"
+        width="100%"
+        align="center"
+      >
+        SignUp page
+      </Typography>
+      <Container
+        component="main"
+        maxWidth="xs"
+      >
+        <Box
+          component="form"
+          noValidate
+          sx={{ mt: 1 }}
+          onSubmit={handleSubmit}
+        >
+          <TextField
+            required
+            fullWidth
+            name="username"
             id="username"
-            placeholder="username"
+            margin="normal"
+            label="Username"
             value={formData.username || ''}
             onChange={onFieldChange}
           />
-        </div>
-        <div>
-        
-        </div>
-        <div>
-          <input
-            type="password"
+          <TextField
+            required
+            fullWidth
+            name="location"
+            id="location"
+            margin="normal"
+            label="Location"
+            type="text"
+            value={formData.location || ''}
+            onChange={onFieldChange}
+          />
+          <TextField
+            required
+            fullWidth
+            name="password"
             id="password"
-            placeholder="password"
+            margin="normal"
+            label="Password"
+            type="password"
             value={formData.password || ''}
             onChange={onFieldChange}
           />
-        </div>
-        <button type="submit">{'SignUp'}</button>
-        <p></p>
-      </form>
-    </div>
+          <FormControl
+            margin="normal"
+            style={{ display: 'flex', justifyContent: 'flex-end', flexDirection: 'row' }}
+          >
+            <Button
+              color="inherit"
+              type="button"
+              variant="outlined"
+              onClick={onClearForm}
+            >
+              Clear
+            </Button>
+            <Button
+              sx={{ marginLeft: '24px' }}
+              // type="submit"
+              variant="contained"
+              onClick={handleSubmit}
+            >
+              SignUp
+            </Button>
+          </FormControl>
+          <p></p>
+        </Box>
+      </Container>
+    </Box>
   )
 }

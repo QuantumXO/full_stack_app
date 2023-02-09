@@ -1,8 +1,9 @@
 import { ChangeEvent, ReactElement, SyntheticEvent, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { NavigateFunction, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { IUser, RootState, setUserData } from '../../store';
+import { RootState, setUserData } from '../../store';
 import { axiosInstance } from '../../services';
+import { AnyAction, Dispatch } from '@reduxjs/toolkit';
 
 interface ILoginData {
   username?: string;
@@ -10,14 +11,14 @@ interface ILoginData {
 }
 
 export default function Login(): ReactElement {
-  const dispatch = useDispatch()
-  const navigate = useNavigate();
+  const dispatch: Dispatch<AnyAction> = useDispatch()
+  const navigate: NavigateFunction = useNavigate();
   
   const isAuthorized: boolean = useSelector((state: RootState) => state.common.isAuthorized);
   
   const [loginData, handleLoginData] = useState<ILoginData>({});
   
-  useEffect(() => {
+  useEffect((): void => {
     if (isAuthorized) {
       navigate('/cms')
       console.log('redirected from /login');
@@ -37,14 +38,10 @@ export default function Login(): ReactElement {
       
       const { user: userData } = res?.data;
   
-      console.log('userData: ', userData);
-  
       userData && dispatch(setUserData(userData));
     } catch (e) {
       console.log(e);
     }
-    
-    console.log('login! ');
   };
   
   const onFieldChange = (e: ChangeEvent<HTMLInputElement>): void => {
