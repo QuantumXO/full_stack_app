@@ -47,8 +47,9 @@ const jwtParams: JwtParamsType = {
     return jwtFromCookies;
   },
 };
+
 const jwtUnlessParams: ExpressUnlessParamsType = {
-  path: ['/public', '/login'],
+  path: ['/public', '/login', '/sign-up'],
 };
 
 export const expressJwtMiddleware = expressjwt(jwtParams).unless(jwtUnlessParams);

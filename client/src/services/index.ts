@@ -14,6 +14,7 @@ axiosInstance.interceptors.response.use(
     const { response = {} } = error;
     const { data: { errorName }} = response;
     if (errorName === 'UnauthorizedError') {
+      console.log('UnauthorizedError redirect to /login');
       window.location.replace('/login');
     }
     throw error;

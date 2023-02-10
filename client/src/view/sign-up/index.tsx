@@ -4,10 +4,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState, setUserData } from '../../store';
 import { axiosInstance } from '../../services';
 import { Typography, Box, TextField, Container, Button, FormControl } from '@mui/material';
+import { AxiosResponse } from 'axios';
 
 interface IFormData {
   username?: string;
   password?: string;
+  location?: string;
+}
+
+interface ISignUpArgs {
+  username: string;
+  password: string;
   location?: string;
 }
 
@@ -32,16 +39,20 @@ export default function SignUp(): ReactElement {
     console.log('e: ', e);
   
     try {
-      const res = await axiosInstance.post(
+      const data: ISignUpArgs = {
+        ...formData
+      }
+      
+      const res: AxiosResponse = await axiosInstance.post(
         '/sign-up',
-        {
-          ...formData
-        }
+        data
       );
       
       const { user: userData } = res?.data;
   
-      userData && dispatch(setUserData(userData));
+      console.log('userData: ', userData);
+  
+      // userData && dispatch(setUserData(userData));
     } catch (e) {
       console.log(e);
     }
@@ -85,11 +96,13 @@ export default function SignUp(): ReactElement {
             id="username"
             margin="normal"
             label="Username"
+            inputProps={{
+              autoComplete: 'off'
+            }}
             value={formData.username || ''}
             onChange={onFieldChange}
           />
           <TextField
-            required
             fullWidth
             name="location"
             id="location"
@@ -107,6 +120,9 @@ export default function SignUp(): ReactElement {
             margin="normal"
             label="Password"
             type="password"
+            inputProps={{
+              autoComplete: 'new-password',
+            }}
             value={formData.password || ''}
             onChange={onFieldChange}
           />
@@ -124,7 +140,7 @@ export default function SignUp(): ReactElement {
             </Button>
             <Button
               sx={{ marginLeft: '24px' }}
-              // type="submit"
+              type="submit"
               variant="contained"
               onClick={handleSubmit}
             >

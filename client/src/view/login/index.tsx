@@ -1,9 +1,10 @@
-import { ChangeEvent, ReactElement, SyntheticEvent, useEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, ReactElement, useEffect, useState } from 'react';
 import { NavigateFunction, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, setUserData } from '../../store';
 import { axiosInstance } from '../../services';
-import { AnyAction, Dispatch } from '@reduxjs/toolkit';
+import { Dispatch } from '@reduxjs/toolkit';
+import { Box, Button, Container, FormControl, TextField, Typography } from '@mui/material';
 
 interface ILoginData {
   username?: string;
@@ -11,12 +12,12 @@ interface ILoginData {
 }
 
 export default function Login(): ReactElement {
-  const dispatch: Dispatch<AnyAction> = useDispatch()
+  const dispatch: Dispatch = useDispatch()
   const navigate: NavigateFunction = useNavigate();
   
   const isAuthorized: boolean = useSelector((state: RootState) => state.common.isAuthorized);
   
-  const [loginData, handleLoginData] = useState<ILoginData>({});
+  const [formData, handleFormData] = useState<ILoginData>({});
   
   useEffect((): void => {
     if (isAuthorized) {
@@ -25,14 +26,15 @@ export default function Login(): ReactElement {
     }
   }, [isAuthorized]);
   
-  const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>): Promise<void> => {
+  
+  const handleSubmit = async (e: FormEvent<HTMLFormElement | HTMLButtonElement>): Promise<void> => {
     e.preventDefault();
   
     try {
       const res = await axiosInstance.post(
         '/login',
         {
-          ...loginData
+          ...formData
         }
       );
       
@@ -47,39 +49,75 @@ export default function Login(): ReactElement {
   const onFieldChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { id, value } = e.target;
     
-    handleLoginData(prev => ({
+    handleFormData(prev => ({
       ...prev,
       [id]: value,
     }));
   };
   
   return (
-    <div className="login">
-      Login page
-      <br/>
-      <br/>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <input
-            type="text"
+    <Box className="sign-up" width="100%" padding="0 24px">
+      <Typography
+        component="h1"
+        variant="h3"
+        width="100%"
+        align="center"
+      >
+        Login page
+      </Typography>
+      <Container
+        component="main"
+        maxWidth="xs"
+      >
+        <Box
+          component="form"
+          noValidate
+          sx={{ mt: 1 }}
+          onSubmit={handleSubmit}
+        >
+          <TextField
+            required
+            fullWidth
+            name="username"
             id="username"
-            placeholder="username"
-            value={loginData.username || ''}
+            margin="normal"
+            label="Username"
+            inputProps={{
+              autoComplete: 'off'
+            }}
+            value={formData.username || ''}
             onChange={onFieldChange}
           />
-        </div>
-        <div>
-          <input
-            type="password"
+          <TextField
+            required
+            fullWidth
+            name="password"
             id="password"
-            placeholder="password"
-            value={loginData.password || ''}
+            margin="normal"
+            label="Password"
+            type="password"
+            inputProps={{
+              autoComplete: 'new-password',
+            }}
+            value={formData.password || ''}
             onChange={onFieldChange}
           />
-        </div>
-        <button type="submit">{'Login'}</button>
-        <p></p>
-      </form>
-    </div>
+          <FormControl
+            margin="normal"
+            style={{ display: 'flex', justifyContent: 'flex-end', flexDirection: 'row' }}
+          >
+            <Button
+              sx={{ marginLeft: '24px' }}
+              // type="submit"
+              variant="contained"
+              onClick={handleSubmit}
+            >
+              Login
+            </Button>
+          </FormControl>
+          <p></p>
+        </Box>
+      </Container>
+    </Box>
   )
 }

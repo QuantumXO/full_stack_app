@@ -3,7 +3,7 @@ import db from '../configs/db';
 const { Schema, model } = db;
 
 export interface IUser {
-  id: number;
+  _id: number;
   userName: string;
   location: string;
   password: string;
@@ -12,7 +12,7 @@ export interface IUser {
 }
 
 export const userSchema = new Schema<IUser>({
-  id: {
+  _id: {
     type: Number,
     required: true,
   },

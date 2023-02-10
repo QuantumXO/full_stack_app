@@ -1,21 +1,20 @@
-import { AppBar, Box, Button, CssBaseline, Link, Toolbar } from '@mui/material';
+import { AppBar, Box, Button, CssBaseline, Link, Toolbar, Divider } from '@mui/material';
 import React, { ReactElement } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, setIsAuthorized } from '../../../../store';
 import { axiosInstance } from '../../../../services';
-import { toast } from 'react-toastify';
+import { Dispatch } from '@reduxjs/toolkit';
+import { Link as RouterLink } from 'react-router-dom';
 
-export default function Header() {
-  const dispatch = useDispatch();
+export default function Header(): ReactElement {
+  const dispatch: Dispatch = useDispatch();
   const isAuthorized: boolean = useSelector((state: RootState) => state.common.isAuthorized);
   
   const onLogout = async (): Promise<void> => {
     try {
-      const { data, status } = await axiosInstance.post('/logout');
-      
+      const { status } = await axiosInstance.post('/logout');
       if (status === 200) {
         dispatch(setIsAuthorized(false));
-        toast(data?.message || 'Logout!', { type: 'success' });
       }
     } catch (e) {
       console.error(e);
@@ -42,20 +41,22 @@ export default function Header() {
       layout = (
         <div>
           <Link
-            href="/login"
+            to="/login"
             variant="button"
             color="#fff"
             underline="none"
             sx={{ my: 1, mx: 1.5 }}
+            component={RouterLink}
           >
             Login
           </Link>
           <Link
-            href="/sign-up"
+            to="/sign-up"
             variant="button"
             color="#fff"
             underline="none"
             sx={{ my: 1, mx: 1.5 }}
+            component={RouterLink}
           >
             Sign up
           </Link>
@@ -78,29 +79,35 @@ export default function Header() {
             width: '100%',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
+            justifyContent: 'flex-end',
           }}
         >
           <nav>
             <Link
-              href="/home"
+              to="/home"
               variant="button"
               color="#fff"
               underline="none"
               sx={{ my: 1, mx: 1.5 }}
+              component={RouterLink}
             >
               Home
             </Link>
             <Link
-              href="/cms"
+              to="/cms"
               variant="button"
               color="#fff"
               underline="none"
               sx={{ my: 1, mx: 1.5 }}
+              component={RouterLink}
             >
               CMS
             </Link>
           </nav>
+          {/*<Divider
+            variant="middle"
+            orientation="vertical"
+          />*/}
           {renderAuthButtons()}
         </Toolbar>
       </AppBar>

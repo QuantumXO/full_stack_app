@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { IUser, UserModel } from '../models/users';
 import bcrypt from 'bcrypt';
 import { Token } from '../services/utils/token';
+import { ILoginResultUser } from '../models/auth';
 
 async function login(req: Request, res: Response) {
   const { username, password } = req.body;
@@ -9,20 +10,31 @@ async function login(req: Request, res: Response) {
   if (!username || !password) {
     return res.status(400).json({ message: 'username or password is missing' });
   } else {
-    const user: IUser | null = await UserModel.findOne({ userName: username }).exec();
-    
-    if (user) {
+    const selectedUser: IUser | null = await UserModel
+      .findOne({ userName: username })
+      .lean()
+      .select('_id userName password location')
+      .exec();
+
+    if (selectedUser) {
       const isValidPassword: boolean = await bcrypt.compare(
         password,
-        user.password
+        selectedUser.password
       );
-      
+
       if (isValidPassword) {
         const accessTokenMaxAge: number = 86400000 // 1d is ms
         const refreshTokenMaxAge: number = 2592000000 // 30d is ms
         
+        const resultUser: ILoginResultUser = {
+          id: String(selectedUser._id),
+          userName: selectedUser.userName,
+          password: selectedUser.password,
+          location: selectedUser.location
+        };
+        
         const accessToken: string = new Token({
-          userId: user.id,
+          userId: resultUser.id,
           expirationTime: '1d',
           // expirationTime: '1s',
         }).getNewAccessToken;
@@ -43,11 +55,7 @@ async function login(req: Request, res: Response) {
           })
           .status(200)
           .json({
-            user: {
-              id: user.id,
-              username: user.userName,
-              location: user.location,
-            },
+            user: resultUser,
             message: 'Login is done! [POST]'
           });
       } else {
@@ -58,7 +66,6 @@ async function login(req: Request, res: Response) {
     }
   }
 }
-
 
 async function logout(req: Request, res: Response): Promise<void> {
   try {
@@ -73,7 +80,19 @@ async function logout(req: Request, res: Response): Promise<void> {
   }
 }
 
+async function signUp(req: Request, res: Response): Promise<void> {
+  const { username, password } = req.body;
+  try {
+    res
+      .status(200)
+      .json({ message: 'SignUp is done! [POST]' })
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 export default {
   login,
   logout,
+  signUp,
 };

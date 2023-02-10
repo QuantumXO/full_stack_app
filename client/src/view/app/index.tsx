@@ -13,7 +13,7 @@ function App(): ReactElement {
     <div className="app">
       <Header />
       <ToastContainer
-        autoClose={2000}
+        autoClose={1000}
       />
       <main style={{ marginTop: '24px' }}>
         <Box sx={{ display: 'flex' }}>

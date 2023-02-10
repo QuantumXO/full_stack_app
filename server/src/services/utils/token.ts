@@ -2,13 +2,13 @@ import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 
 interface ITokenProps {
-  userId?: number;
+  userId?: string;
   expirationTime?: number | string;
 }
 
 export class Token {
   private token: string | undefined;
-  private readonly userId: number | undefined;
+  private readonly userId: string | undefined;
   private readonly expirationTime: number | undefined | string;
   
   constructor({ userId, expirationTime }: ITokenProps) {

@@ -22,7 +22,6 @@ function CMS(): ReactElement {
   const getProducts = async (): Promise<void> => {
     try {
       const response = await axiosInstance.get('/products');
-      
       setProducts(response?.data.products);
     } catch (e) {
       console.log(e);
@@ -32,7 +31,6 @@ function CMS(): ReactElement {
   const privateRequest = async (): Promise<void> => {
     try {
       const res = await axiosInstance.get('/protected');
-      
       console.log(res?.data);
     } catch (e) {
       console.error(e);
@@ -42,7 +40,6 @@ function CMS(): ReactElement {
   const publicRequest = async (): Promise<void> => {
     try {
       const res = await axiosInstance.get('/public');
-      
       console.log(res?.data);
     } catch (e) {
       console.error(e);
