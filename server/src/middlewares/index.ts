@@ -49,12 +49,12 @@ const jwtParams: JwtParamsType = {
 };
 
 const jwtUnlessParams: ExpressUnlessParamsType = {
-  path: ['/public', '/login', '/sign-up'],
+  path: ['/public', '/login', '/sign-up'/*, '/socket.io/'*/],
 };
 
 export const expressJwtMiddleware = expressjwt(jwtParams).unless(jwtUnlessParams);
 
-const originslist: string[] = ['http://localhost:3000'];
+const originslist: string[] = [process.env.ALLOWED_ORIGIN];
 const corsOptions: CorsOptions = {
   origin: function (origin: string | undefined, callback) {
     if (originslist.indexOf(origin) !== -1) {
@@ -64,6 +64,7 @@ const corsOptions: CorsOptions = {
     }
   },
   credentials: true,
+  methods: ['GET', 'PUT', 'POST', 'DELETE'],
   optionsSuccessStatus: 200 // For legacy browser support
 };
 

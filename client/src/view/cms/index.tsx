@@ -1,6 +1,7 @@
 import React, { ReactElement } from 'react';
 import { axiosInstance } from '../../services';
-import { Box, Button } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 interface IProduct {
   id: number;
@@ -8,6 +9,7 @@ interface IProduct {
 }
 
 function CMS(): ReactElement {
+  const { t } = useTranslation();
   const [products, setProducts] = React.useState<[] | null>(null);
   
   const onAPIRequest = async (): Promise<void> => {
@@ -64,12 +66,19 @@ function CMS(): ReactElement {
           )
         }
       </div>
-    )
+    );
   };
   
   return (
-    <div className="CMS">
-      <header className="CMS-header"></header>
+    <Box className="CMS" width="100%" padding="0 24px">
+      <Typography
+        component="h1"
+        variant="h3"
+        width="100%"
+        align="center"
+      >
+        {t('CMS page')}
+      </Typography>
       <Box sx={{ display: 'flex', gap: '24px' }}>
         <Button
           size="medium"
@@ -101,7 +110,7 @@ function CMS(): ReactElement {
         </Button>
       </Box>
       {renderProducts()}
-    </div>
+    </Box>
   );
 }
 

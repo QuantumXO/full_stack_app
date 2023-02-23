@@ -1,10 +1,11 @@
-import { AppBar, Box, Button, CssBaseline, Link, Toolbar, Divider } from '@mui/material';
+import { AppBar, Box, Button, CssBaseline, Link, Toolbar } from '@mui/material';
 import React, { ReactElement } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState, setIsAuthorized } from '../../../../store';
-import { axiosInstance } from '../../../../services';
+import { RootState, setIsAuthorized } from '../../../store';
+import { axiosInstance } from '../../../services';
 import { Dispatch } from '@reduxjs/toolkit';
 import { Link as RouterLink } from 'react-router-dom';
+import Notifications from './components/notifications';
 
 export default function Header(): ReactElement {
   const dispatch: Dispatch = useDispatch();
@@ -82,6 +83,7 @@ export default function Header(): ReactElement {
             justifyContent: 'flex-end',
           }}
         >
+          <Notifications />
           <nav>
             <Link
               to="/home"
@@ -104,10 +106,6 @@ export default function Header(): ReactElement {
               CMS
             </Link>
           </nav>
-          {/*<Divider
-            variant="middle"
-            orientation="vertical"
-          />*/}
           {renderAuthButtons()}
         </Toolbar>
       </AppBar>

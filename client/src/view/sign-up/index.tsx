@@ -1,10 +1,12 @@
-import { ChangeEvent, FormEvent, ReactElement, SyntheticEvent, useEffect, useState } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState, setUserData } from '../../store';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 import { axiosInstance } from '../../services';
-import { Typography, Box, TextField, Container, Button, FormControl } from '@mui/material';
 import { AxiosResponse } from 'axios';
+import { useTranslation } from 'react-i18next';
+import { Typography, Box, TextField, Container, Button, FormControl } from '@mui/material';
+import { useForm, SubmitHandler } from 'react-hook-form';
 
 interface IFormData {
   username?: string;
@@ -19,55 +21,33 @@ interface ISignUpArgs {
 }
 
 export default function SignUp(): ReactElement {
-  const dispatch = useDispatch()
+  const { t } = useTranslation();
   const navigate = useNavigate();
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<IFormData>();
   
   const isAuthorized: boolean = useSelector((state: RootState) => state.common.isAuthorized);
   
-  const [formData, handleFormData] = useState<IFormData>({});
-  
   useEffect(() => {
     if (isAuthorized) {
-      navigate('/cms')
+      navigate('/cms');
       console.log('redirected from /sign-up');
     }
   }, [isAuthorized]);
   
-  const handleSubmit = async (e: FormEvent<HTMLFormElement | HTMLButtonElement>): Promise<void> => {
-    e.preventDefault();
-  
-    console.log('e: ', e);
-  
+  const onSubmit: SubmitHandler<IFormData> = async (formData: IFormData): Promise<void> => {
     try {
-      const data: ISignUpArgs = {
-        ...formData
-      }
-      
       const res: AxiosResponse = await axiosInstance.post(
         '/sign-up',
-        data
+        formData as ISignUpArgs
       );
-      
-      const { user: userData } = res?.data;
   
-      console.log('userData: ', userData);
-  
-      // userData && dispatch(setUserData(userData));
+      console.log('res: ', res);
     } catch (e) {
       console.log(e);
     }
   };
   
-  const onFieldChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    const { id, value } = e.target;
-    
-    handleFormData(prev => ({
-      ...prev,
-      [id]: value,
-    }));
-  };
-  
-  const onClearForm = (): void => handleFormData({});
+  const onClearForm = (): void => reset();
   
   return (
     <Box className="sign-up" width="100%" padding="0 24px">
@@ -77,7 +57,7 @@ export default function SignUp(): ReactElement {
         width="100%"
         align="center"
       >
-        SignUp page
+        {t('SignUp page')}
       </Typography>
       <Container
         component="main"
@@ -87,44 +67,44 @@ export default function SignUp(): ReactElement {
           component="form"
           noValidate
           sx={{ mt: 1 }}
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmit(onSubmit)}
         >
           <TextField
             required
             fullWidth
-            name="username"
             id="username"
             margin="normal"
             label="Username"
             inputProps={{
               autoComplete: 'off'
             }}
-            value={formData.username || ''}
-            onChange={onFieldChange}
+            error={!!errors.username}
+            // value={formData.username || ''}
+            {...register('username', { required: true })}
           />
           <TextField
             fullWidth
-            name="location"
             id="location"
             margin="normal"
             label="Location"
             type="text"
-            value={formData.location || ''}
-            onChange={onFieldChange}
+            // value={formData.location || ''}
+            {...register('location')}
           />
           <TextField
             required
             fullWidth
-            name="password"
             id="password"
             margin="normal"
             label="Password"
             type="password"
+            error={!!errors.password}
             inputProps={{
               autoComplete: 'new-password',
             }}
-            value={formData.password || ''}
-            onChange={onFieldChange}
+            // helperText={'This field is required'}
+            // value={formData.password || ''}
+            {...register('password', { required: true })}
           />
           <FormControl
             margin="normal"
@@ -142,7 +122,6 @@ export default function SignUp(): ReactElement {
               sx={{ marginLeft: '24px' }}
               type="submit"
               variant="contained"
-              onClick={handleSubmit}
             >
               SignUp
             </Button>
@@ -151,5 +130,5 @@ export default function SignUp(): ReactElement {
         </Box>
       </Container>
     </Box>
-  )
+  );
 }

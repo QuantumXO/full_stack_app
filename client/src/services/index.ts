@@ -1,7 +1,9 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
+const { REACT_APP_BASE_URL } = process.env;
+
 export const axiosInstance: AxiosInstance = axios.create({
-  baseURL: 'http://localhost:3001',
+  baseURL: REACT_APP_BASE_URL,
   withCredentials: true,
   validateStatus: function (status: number): boolean {
     return status >= 200 && status < 400

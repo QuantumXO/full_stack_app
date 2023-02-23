@@ -67,6 +67,34 @@ async function login(req: Request, res: Response) {
   }
 }
 
+async function signUp(req: Request, res: Response): Promise<void> {
+  const { username, password } = req.body;
+  
+  try {
+    const selectedUser: IUser | null = await UserModel
+      .findOne({ userName: username })
+      .exec();
+    
+    if (!username || !password) {
+      res.status(400).json({ error: 'Incorrect password or username' });
+    } else {
+      if (selectedUser) {
+        res
+          .status(401)
+          .json({ message: `${username} already exist` });
+      } else {
+      
+      }
+    }
+    
+    res
+      .status(200)
+      .json({ message: 'SignUp is done! [POST]' });
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 async function logout(req: Request, res: Response): Promise<void> {
   try {
     res
@@ -75,17 +103,6 @@ async function logout(req: Request, res: Response): Promise<void> {
       .status(200)
       .json({ message: 'Logout is done! [POST]' })
       .end();
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-async function signUp(req: Request, res: Response): Promise<void> {
-  const { username, password } = req.body;
-  try {
-    res
-      .status(200)
-      .json({ message: 'SignUp is done! [POST]' })
   } catch (e) {
     console.log(e);
   }
