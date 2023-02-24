@@ -3,12 +3,10 @@ import axios from 'axios';
 
 export async function api(req: Request, res: Response): Promise<void> {
   try {
-  
+    res.send('/api [GET]');
   } catch (e) {
     console.log('/api e: ', e);
   }
-  
-  res.send('GET endpoint from api');
 }
 
 export async function publicRoute(req: Request, res: Response): Promise<void> {

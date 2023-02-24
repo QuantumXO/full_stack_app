@@ -3,14 +3,16 @@ import express, { Express } from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import rootRouter from './routes';
-import { corsMiddleware, errorsHandlerMiddleware, expressJwtMiddleware } from './middlewares';
+import middlewares from './middlewares';
 import mongoose from 'mongoose';
 import http from 'http';
 import { Server } from 'socket.io';
 import createIoServer from './configs/socket';
+import { unlessParams } from './middlewares/jwt';
 
 dotenv.config();
 
+const { jwtMiddleware, errorsHandlerMiddleware, corsMiddleware } = middlewares;
 export const app: Express = express();
 const PORT = process.env.PORT || 3001;
 
@@ -29,9 +31,9 @@ const serverStart = async () => {
     app.use(corsMiddleware);
     app.use(bodyParser.json());
     app.use(cookieParser());
-    app.use(expressJwtMiddleware);
-    app.use(errorsHandlerMiddleware);
+    app.use(jwtMiddleware.unless(unlessParams));
     app.use(rootRouter);
+    app.use(errorsHandlerMiddleware);
     // -- MIDDLEWARES
   
     ioServer.on('connection', (socket): void => {

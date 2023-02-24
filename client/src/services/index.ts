@@ -10,13 +10,15 @@ export const axiosInstance: AxiosInstance = axios.create({
   },
 });
 
+const tokenErrors: string[] = ['UnauthorizedError', 'TokenExpiredError'];
+
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: any) => {
     const { response = {} } = error;
     const { data: { errorName }} = response;
-    if (errorName === 'UnauthorizedError') {
-      console.log('UnauthorizedError redirect to /login');
+    if (tokenErrors.includes(errorName)) {
+      console.log(`${errorName} redirect to /login`);
       window.location.replace('/login');
     }
     throw error;

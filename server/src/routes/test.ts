@@ -1,9 +1,8 @@
 import { Router } from 'express';
-import AuthController from '../controllers/auth';
+import TestController from '../controllers/test';
 
 const testRouter: Router = Router();
 
-testRouter.route('/login').post(AuthController.login);
-testRouter.route('/logout').post(AuthController.logout);
+testRouter.route('/api').get(TestController.api);
 
 export default <Router>testRouter;

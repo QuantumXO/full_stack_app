@@ -14,7 +14,7 @@ interface ICommonState {
 }
 
 const initialState: ICommonState = {
-  isAuthorized: !!jsCookie.get('refreshToken'),
+  isAuthorized: !!jsCookie.get('refresh'),
 };
 
 const commonSlice: Slice = createSlice({

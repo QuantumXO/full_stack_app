@@ -1,8 +1,12 @@
 import { Request, Response } from 'express';
 import { IUser, UserModel } from '../models/users';
 import bcrypt from 'bcrypt';
-import { Token } from '../services/utils/token';
+import { Token } from '../services/token';
 import { ILoginResultUser } from '../models/auth';
+import dotenv from 'dotenv';
+import { ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } from '../constants';
+
+dotenv.config();
 
 async function login(req: Request, res: Response) {
   const { username, password } = req.body;
@@ -21,35 +25,29 @@ async function login(req: Request, res: Response) {
         password,
         selectedUser.password
       );
-
+      
       if (isValidPassword) {
-        const accessTokenMaxAge: number = 86400000 // 1d is ms
-        const refreshTokenMaxAge: number = 2592000000 // 30d is ms
-        
         const resultUser: ILoginResultUser = {
           id: String(selectedUser._id),
           userName: selectedUser.userName,
           password: selectedUser.password,
           location: selectedUser.location
         };
-        
-        const accessToken: string = new Token({
-          userId: resultUser.id,
-          expirationTime: '1d',
-          // expirationTime: '1s',
-        }).getNewAccessToken;
-        
-        const refreshToken: string = new Token({
-          expirationTime: '30d',
-          // expirationTime: '1s',
-        }).getNewRefreshToken;
+  
+        const {
+          access: accessToken,
+          refresh: refreshToken
+        } = await new Token({ userId: resultUser.id }).updateAccessRefreshTokens();
+  
+        const accessTokenMaxAge: number = Number(process.env.ACCESS_TOKEN_MAX_AGE);
+        const refreshTokenMaxAge: number = Number(process.env.REFRESH_TOKEN_MAX_AGE);
         
         return res
-          .cookie('jwt', accessToken, {
+          .cookie(ACCESS_TOKEN_NAME, accessToken, {
             httpOnly: true,
             maxAge: accessTokenMaxAge,
           })
-          .cookie('refreshToken', refreshToken, {
+          .cookie(REFRESH_TOKEN_NAME, refreshToken, {
             httpOnly: false,
             maxAge: refreshTokenMaxAge,
           })
@@ -95,11 +93,11 @@ async function signUp(req: Request, res: Response): Promise<void> {
   }
 }
 
-async function logout(req: Request, res: Response): Promise<void> {
+async function logOut(req: Request, res: Response): Promise<void> {
   try {
     res
-      .clearCookie('jwt')
-      .clearCookie('refreshToken')
+      .clearCookie(ACCESS_TOKEN_NAME)
+      .clearCookie(REFRESH_TOKEN_NAME)
       .status(200)
       .json({ message: 'Logout is done! [POST]' })
       .end();
@@ -110,6 +108,6 @@ async function logout(req: Request, res: Response): Promise<void> {
 
 export default {
   login,
-  logout,
   signUp,
+  logOut,
 };
