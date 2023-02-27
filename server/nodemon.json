@@ -8,5 +8,8 @@
     "./src"
   ],
   "exec": "npm start",
-  "ext": "ts"
+  "ext": "ts",
+  "events": {
+    "start": "clear"
+  }
 }

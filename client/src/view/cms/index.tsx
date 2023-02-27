@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { axiosInstance } from '../../services';
+import { axiosInstance } from '../../services/axios';
 import { Box, Button, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 

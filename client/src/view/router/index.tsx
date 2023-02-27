@@ -13,11 +13,12 @@ const router: RemixRouter = createBrowserRouter([
   {
     path: '/',
     element: <App/>,
-    // errorElement: <div>Something went wrong...</div>,
+    errorElement: <div>Something went wrong...</div>,
     children: [
       { index: true, element: <Home /> },
       { path: 'home', element: <Home /> },
       { path: 'cms', element: <ProtectedRoute Component={CMS} /> },
+      // { path: 'cms', element: <CMS /> },
       { path: 'login', element: <Login /> },
       { path: 'sign-up', element: <SignUp /> },
     ]

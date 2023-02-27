@@ -1,16 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { Params as ExpressUnlessParamsType } from 'express-unless';
 import { ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } from '../constants';
 import dotenv from 'dotenv';
-import { unless } from 'express-unless';
 import { Token, TokenType } from '../services/token';
 import getCustomError from '../services/get-custom-error';
 import { IRefreshToken } from '../models/common/refresh-token';
+import { Params as ExpressUnlessParamsType, unless } from 'express-unless';
 
 dotenv.config();
 
-const excludedPaths: string[] = ['/public', '/login', '/logout', /*'/socket.io/'*/];
+const excludedPaths: string[] = ['/public', '/login', /*'/socket.io/'*/];
 export const unlessParams: ExpressUnlessParamsType = {
   path: excludedPaths,
 };
@@ -22,6 +21,8 @@ const jwtMiddleware = async (req: Request, res: Response, next: NextFunction): P
   
   const accessToken = cookies[accessTokenName];
   const refreshToken = cookies[refreshTokenName];
+  
+  console.log('jwtMiddleware()');
   
   if (accessToken) {
     try {
@@ -49,7 +50,10 @@ const jwtMiddleware = async (req: Request, res: Response, next: NextFunction): P
         const dbRefreshToken: IRefreshToken | undefined = await new Token({}).getDbRefreshToken(id);
         
         if (dbRefreshToken) {
-          await new Token({ userId: dbRefreshToken.userId }).updateAccessRefreshTokens();
+          const { access, refresh } = await new Token({ userId: dbRefreshToken.userId })
+            .updateAccessRefreshTokens();
+  
+          new Token({}).setCookieTokens(access, refresh, res);
         } else {
           next(getCustomError('UnauthorizedError', 'Invalid token... (refresh) (db)'));
         }

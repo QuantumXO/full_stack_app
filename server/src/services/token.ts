@@ -2,7 +2,7 @@ import jwt, { Algorithm } from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import { IRefreshToken, RefreshTokenModel } from '../models/common/refresh-token';
 import { ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } from '../constants';
-import { get } from 'lodash';
+import { Response } from 'express';
 
 export type TokenType = 'access' | 'refresh';
 
@@ -37,6 +37,9 @@ interface IGetRefreshToken extends IGetToken {
 type GetAccessRefreshTokensType = {
   [key in TokenType]: string;
 };
+
+const accessTokenMaxAge: number = Number(process.env.ACCESS_TOKEN_MAX_AGE);
+const refreshTokenMaxAge: number = Number(process.env.REFRESH_TOKEN_MAX_AGE);
 
 export class Token {
   private readonly userId: string | undefined;
@@ -92,9 +95,19 @@ export class Token {
   
   public async replaceDbRefreshToken(tokenId: string): Promise<void> {
     this.throwUserIdError();
-    await RefreshTokenModel.findOneAndReplace({ userId: this.userId }).exec();
+    this.deleteDbRefreshToken();
+    
+    await RefreshTokenModel.create({
+      tokenId,
+      userId: this.userId,
+      // expireAt: new Date(Date.now() + refreshTokenMaxAge),
+      expireAt: new Date(Date.now() + 1000),
+    });
+  }
   
-    await RefreshTokenModel.create({ tokenId, userId: this.userId });
+  public deleteDbRefreshToken(): void {
+    this.throwUserIdError();
+    RefreshTokenModel.findOneAndRemove({ userId: this.userId }).exec();
   }
   
   public get getAccessRefreshTokens(): GetAccessRefreshTokensType {
@@ -129,5 +142,23 @@ export class Token {
     }
     
     return result;
+  }
+  
+  public setCookieTokens(accessToken: string, refreshToken: string, res: Response): Response {
+    return res
+      .cookie(ACCESS_TOKEN_NAME, accessToken, {
+        httpOnly: false,
+        maxAge: accessTokenMaxAge,
+      })
+      .cookie(REFRESH_TOKEN_NAME, refreshToken, {
+        httpOnly: true,
+        maxAge: refreshTokenMaxAge,
+      });
+  }
+  
+  public removeCookieTokens(res: Response): Response {
+    return res
+      .clearCookie(ACCESS_TOKEN_NAME)
+      .clearCookie(REFRESH_TOKEN_NAME);
   }
 }

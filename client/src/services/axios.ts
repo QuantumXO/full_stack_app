@@ -24,4 +24,3 @@ axiosInstance.interceptors.response.use(
     throw error;
   }
 );
-

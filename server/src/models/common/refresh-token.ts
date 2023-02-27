@@ -5,6 +5,7 @@ const { Schema, model } = db;
 export interface IRefreshToken {
   userId: string;
   tokenId: string;
+  expireAt: Date;
 }
 
 export const refreshTokenSchema = new Schema<IRefreshToken>({
@@ -16,6 +17,10 @@ export const refreshTokenSchema = new Schema<IRefreshToken>({
     type: String,
     required: true,
   },
+  expireAt: {
+    type: Date,
+    required: true,
+  }
 });
 
 export const RefreshTokenModel = model<IRefreshToken>('refresh-tokens', refreshTokenSchema);

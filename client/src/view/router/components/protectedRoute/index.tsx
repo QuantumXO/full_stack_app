@@ -8,10 +8,9 @@ interface IProtectedRoute {
   redirectPath?: string;
 }
 
-const ProtectedRoute = memo((props: IProtectedRoute): JSX.Element => {
+function ProtectedRoute (props: IProtectedRoute): JSX.Element {
   const { Component, redirectPath = '/login' } = props;
   const isAuthorized: boolean = useSelector((state: RootState) => state.common.isAuthorized);
-  
   return (
     <>
       {isAuthorized
@@ -20,6 +19,6 @@ const ProtectedRoute = memo((props: IProtectedRoute): JSX.Element => {
       }
     </>
   )
-});
+}
 
-export default ProtectedRoute;
+export default memo(ProtectedRoute);

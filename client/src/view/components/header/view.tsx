@@ -1,13 +1,13 @@
 import { AppBar, Box, Button, CssBaseline, Link, Toolbar } from '@mui/material';
-import React, { ReactElement } from 'react';
+import React, { memo, ReactElement, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, setIsAuthorized } from '../../../store';
-import { axiosInstance } from '../../../services';
+import { axiosInstance } from '../../../services/axios';
 import { Dispatch } from '@reduxjs/toolkit';
 import { Link as RouterLink } from 'react-router-dom';
 import Notifications from './components/notifications';
 
-export default function Header(): ReactElement {
+export function Header(): ReactElement {
   const dispatch: Dispatch = useDispatch();
   const isAuthorized: boolean = useSelector((state: RootState) => state.common.isAuthorized);
   

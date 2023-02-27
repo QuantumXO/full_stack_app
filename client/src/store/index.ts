@@ -1,6 +1,7 @@
 import { configureStore, createSlice } from '@reduxjs/toolkit';
 import { Slice } from '@reduxjs/toolkit/src/createSlice';
 import jsCookie from 'js-cookie';
+import { ACCESS_TOKEN_NAME } from '../constants';
 
 export interface IUser {
   id: number;
@@ -14,7 +15,7 @@ interface ICommonState {
 }
 
 const initialState: ICommonState = {
-  isAuthorized: !!jsCookie.get('refresh'),
+  isAuthorized: !!jsCookie.get(ACCESS_TOKEN_NAME),
 };
 
 const commonSlice: Slice = createSlice({
@@ -23,7 +24,6 @@ const commonSlice: Slice = createSlice({
   reducers: {
     setUserData: (state, action) => {
       state.user = action.payload;
-      state.isAuthorized = true;
     },
     setIsAuthorized: (state, action) => {
       state.isAuthorized = action.payload;

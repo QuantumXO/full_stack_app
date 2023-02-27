@@ -1,8 +1,8 @@
 import { ChangeEvent, FormEvent, ReactElement, useEffect, useState } from 'react';
 import { NavigateFunction, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState, setUserData } from '../../store';
-import { axiosInstance } from '../../services';
+import { RootState, setIsAuthorized, setUserData } from '../../store';
+import { axiosInstance } from '../../services/axios';
 import { Dispatch } from '@reduxjs/toolkit';
 import { Box, Button, Container, FormControl, TextField, Typography } from '@mui/material';
 
@@ -11,7 +11,7 @@ interface ILoginData {
   password?: string;
 }
 
-export default function Login(): ReactElement {
+function Login(): ReactElement {
   const dispatch: Dispatch = useDispatch()
   const navigate: NavigateFunction = useNavigate();
   
@@ -21,11 +21,10 @@ export default function Login(): ReactElement {
   
   useEffect((): void => {
     if (isAuthorized) {
-      navigate('/cms')
+      navigate('/cms');
       console.log('redirected from /login');
     }
   }, [isAuthorized]);
-  
   
   const handleSubmit = async (e: FormEvent<HTMLFormElement | HTMLButtonElement>): Promise<void> => {
     e.preventDefault();
@@ -40,7 +39,10 @@ export default function Login(): ReactElement {
       
       const { user: userData } = res?.data;
   
-      userData && dispatch(setUserData(userData));
+      if (userData) {
+        dispatch(setUserData(userData));
+        dispatch(setIsAuthorized(true));
+      }
     } catch (e) {
       console.log(e);
     }
@@ -121,3 +123,5 @@ export default function Login(): ReactElement {
     </Box>
   )
 }
+
+export default Login;

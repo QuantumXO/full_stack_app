@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import { IUser, UserModel } from '../models/users';
 import bcrypt from 'bcrypt';
-import { Token } from '../services/token';
+import { Token, TokenType } from '../services/token';
 import { ILoginResultUser } from '../models/auth';
 import dotenv from 'dotenv';
-import { ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } from '../constants';
+import { get } from 'lodash';
 
 dotenv.config();
 
@@ -39,18 +39,9 @@ async function login(req: Request, res: Response) {
           refresh: refreshToken
         } = await new Token({ userId: resultUser.id }).updateAccessRefreshTokens();
   
-        const accessTokenMaxAge: number = Number(process.env.ACCESS_TOKEN_MAX_AGE);
-        const refreshTokenMaxAge: number = Number(process.env.REFRESH_TOKEN_MAX_AGE);
+        const responseWithCookies: Response = new Token({}).setCookieTokens(accessToken, refreshToken, res);
         
-        return res
-          .cookie(ACCESS_TOKEN_NAME, accessToken, {
-            httpOnly: true,
-            maxAge: accessTokenMaxAge,
-          })
-          .cookie(REFRESH_TOKEN_NAME, refreshToken, {
-            httpOnly: false,
-            maxAge: refreshTokenMaxAge,
-          })
+        return responseWithCookies
           .status(200)
           .json({
             user: resultUser,
@@ -94,10 +85,17 @@ async function signUp(req: Request, res: Response): Promise<void> {
 }
 
 async function logOut(req: Request, res: Response): Promise<void> {
+  const { cookies } = req;
+  const accessTokenName: TokenType = 'access';
+  
+  const accessToken = cookies[accessTokenName];
+  const decoded = new Token({}).getDecoded(accessToken);
+  const userId = get(decoded, 'userId');
+  new Token({ userId }).deleteDbRefreshToken();
+  const responseWithoutCookies: Response = new Token({}).removeCookieTokens(res);
+  
   try {
-    res
-      .clearCookie(ACCESS_TOKEN_NAME)
-      .clearCookie(REFRESH_TOKEN_NAME)
+    responseWithoutCookies
       .status(200)
       .json({ message: 'Logout is done! [POST]' })
       .end();

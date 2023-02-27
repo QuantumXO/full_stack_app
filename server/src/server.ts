@@ -12,6 +12,8 @@ import { unlessParams } from './middlewares/jwt';
 
 dotenv.config();
 
+console.clear();
+
 const { jwtMiddleware, errorsHandlerMiddleware, corsMiddleware } = middlewares;
 export const app: Express = express();
 const PORT = process.env.PORT || 3001;
@@ -47,7 +49,7 @@ const serverStart = async () => {
     });
     
     // app.get('/socket.io');
-    
+
     mongoose.connection.on('open', function (ref): void {
       console.log('MongoDB connected.');
       //trying to get collection names

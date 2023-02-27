@@ -14,14 +14,14 @@ const root = createRoot(
 root.render(
   <StrictMode>
     <ErrorBoundary>
-      <Suspense fallback={<div>Loading...</div>}>
-        <Provider store={store}>
+      <Provider store={store}>
+        <Suspense fallback={<div>Loading...</div>}>
           <RouterProvider
             router={router}
             fallbackElement={<div>Loading...</div>}
           />
-        </Provider>
-      </Suspense>
+        </Suspense>
+      </Provider>
     </ErrorBoundary>
   </StrictMode>
 );
