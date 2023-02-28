@@ -22,8 +22,6 @@ const jwtMiddleware = async (req: Request, res: Response, next: NextFunction): P
   const accessToken = cookies[accessTokenName];
   const refreshToken = cookies[refreshTokenName];
   
-  console.log('jwtMiddleware()');
-  
   if (accessToken) {
     try {
       const decoded: string | jwt.JwtPayload = new Token({}).getDecoded(accessToken);

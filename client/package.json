@@ -2,6 +2,7 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
+  "author": "Sikorskiy Dmitriy",
   "engines": {
     "node": "16.18.1"
   },

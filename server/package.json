@@ -11,7 +11,7 @@
     "start:nodemon": "./node_modules/nodemon/bin/nodemon.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Sikorskiy Dmitriy",
   "license": "ISC",
   "dependencies": {
     "axios": "1.2.6",

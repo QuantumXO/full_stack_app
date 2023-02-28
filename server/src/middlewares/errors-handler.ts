@@ -18,8 +18,6 @@ class HttpException extends Error {
 function errorsHandlerMiddleware(err: HttpException, req: Request, res: Response, next: NextFunction): void {
   if (err) {
     const { name, message } = err;
-    console.log('errorsHandlerMiddleware(): ', name, message);
-    
     
     if (name === 'UnauthorizedError') {
       res
