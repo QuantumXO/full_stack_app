@@ -1,5 +1,5 @@
 import { AppBar, Box, Button, CssBaseline, Link, Toolbar } from '@mui/material';
-import React, { memo, ReactElement, useEffect } from 'react';
+import React, { ReactElement } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, setIsAuthorized } from '../../../store';
 import { axiosInstance } from '../../../services/axios';

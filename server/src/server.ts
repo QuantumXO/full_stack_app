@@ -2,13 +2,14 @@ import dotenv from 'dotenv';
 import express, { Express } from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
-import rootRouter from './routes';
+import rootRouter from '@routes/index';
 import middlewares from '@middlewares/index';
 import mongoose from 'mongoose';
 import http from 'http';
-import { Server } from 'socket.io';
-import createIoServer from './configs/socket';
+import { Server, Socket } from 'socket.io';
+import createIoServer from '@configs/socket';
 import { unlessParams } from '@middlewares/jwt';
+import { registerNotificationsHandlers } from '@controllers/notifications';
 
 dotenv.config();
 
@@ -20,12 +21,19 @@ const PORT = process.env.PORT || 3001;
 
 export const httpServer: http.Server = http.createServer(app);
 
-const ioServer: Server = createIoServer();
+export const ioServer: Server = createIoServer();
 
-const mockNotifications = [
-  { id: '0', title: 'Title notification 0', body: 'Some text', isNew: true, createdAt: Date()},
-  { id: '1', title: 'Title notification 1', body: 'Some text', createdAt: Date() },
-];
+function onConnection(socket: Socket): void {
+  console.log(`⚡: ${socket.id} user just connected!`);
+  
+  socket.emit('connection:sid', socket.id);
+  
+  registerNotificationsHandlers(ioServer, socket);
+  
+  socket.on('disconnect', () => {
+    console.log('🔥: A user disconnected');
+  });
+}
 
 const serverStart = async () => {
   try {
@@ -38,15 +46,7 @@ const serverStart = async () => {
     app.use(errorsHandlerMiddleware);
     // -- MIDDLEWARES
   
-    ioServer.on('connection', (socket): void => {
-      console.log(`⚡: ${socket.id} user just connected!`);
-  
-      socket.emit('notifications', { data: { notifications: mockNotifications } });
-      
-      socket.on('disconnect', () => {
-        console.log('🔥: A user disconnected');
-      });
-    });
+    ioServer.on('connection', onConnection);
     
     // app.get('/socket.io');
 

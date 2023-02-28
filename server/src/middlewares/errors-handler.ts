@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import jwt  from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } from '../constants';
 

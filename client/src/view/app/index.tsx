@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, { memo, ReactElement, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { Box } from '@mui/material';
@@ -10,9 +10,7 @@ function App(): ReactElement {
   return (
     <div className="app">
       <Header />
-      <ToastContainer
-        autoClose={1000}
-      />
+      <ToastContainer autoClose={1000} />
       <main style={{ marginTop: '24px' }}>
         <Box sx={{ display: 'flex' }}>
           <Outlet/>
@@ -22,4 +20,4 @@ function App(): ReactElement {
   );
 }
 
-export default App;
+export default memo(App);

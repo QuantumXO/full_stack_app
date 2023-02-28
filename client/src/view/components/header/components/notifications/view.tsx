@@ -7,14 +7,8 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import socket from '../../../../../services/socket';
 import { get } from 'lodash';
 import cx from 'classnames';
-
-interface INotification {
-  id: string;
-  title: string;
-  body: string;
-  isNew?: boolean;
-  createdAt?: Date;
-}
+import { toast } from 'react-toastify';
+import { INotification } from '../../../../../models/common/notifications';
 
 const StyledButton = styled('div')({
   marginLeft: 12,
@@ -33,7 +27,7 @@ const NewNotificationsIcon = styled('span')({
   zIndex: '99',
 });
 
-function Notifications(): ReactElement | null {
+export function Notifications(): ReactElement | null {
   const isAuthorized: boolean = useSelector((state: RootState) => state.common.isAuthorized);
   
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -42,17 +36,22 @@ function Notifications(): ReactElement | null {
   const showList: boolean = Boolean(anchorEl);
   
   useEffect(() => {
-    if (isAuthorized) {
-      socket.on('notifications', (args = {}) => {
-        const newNotifications: INotification[] = get(args, 'data.notifications', []);
-        setNotifications(newNotifications);
-      });
-      
-      return (): void => {
-        socket.off('notifications');
-      };
+    socket.on('notifications:list', (args = {}) => {
+      const newNotifications: INotification[] = get(args, 'data.notifications', []);
+      setNotifications(newNotifications);
+    });
+    socket.on('notifications:create', createNotificationHandler);
+    
+    return (): void => {
+      socket.off('notifications:list');
+      socket.off('notifications:create');
     }
-  }, [isAuthorized, socket]);
+  }, []);
+  
+  function createNotificationHandler(newNotification: INotification): void {
+    const { title, type } = newNotification;
+    toast(title, { type });
+  }
   
   const onShowList = (event: MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
   
@@ -80,7 +79,8 @@ function Notifications(): ReactElement | null {
       >
         {Array.isArray(notifications)
           ? notifications.map((item: INotification): ReactElement => {
-            const { id, isNew, title, createdAt } = item;
+            const { id, title, createdAt, readAt } = item;
+            const isNew: boolean = !!readAt;
             return (
               <MenuItem
                 key={id}
@@ -135,5 +135,3 @@ function Notifications(): ReactElement | null {
   
   return layout;
 }
-
-export default memo(Notifications);

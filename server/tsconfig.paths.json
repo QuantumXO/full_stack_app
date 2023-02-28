@@ -6,9 +6,11 @@
       "@constants/*": ["constants/*"],
       "@configs/*": ["configs/*"],
       "@middlewares/*": ["middlewares/*"],
-      "@routes/*": ["routes/*"],
       "@controllers/*": ["controllers/*"],
-      "@models/*": ["models/*"]
+      "@routes/*": ["routes/*"],
+      "@models/*": ["models/*"],
+      "@interfaces/*": ["interfaces/*"],
+      "@src/*": [".//*"]
     }
   }
 }

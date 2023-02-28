@@ -1,4 +1,4 @@
-import { StrictMode, Suspense } from 'react';
+import { Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import router from './view/router';
 import { RouterProvider } from 'react-router-dom';
@@ -12,16 +12,16 @@ const root = createRoot(
 );
 
 root.render(
-  <StrictMode>
-    <ErrorBoundary>
-      <Provider store={store}>
-        <Suspense fallback={<div>Loading...</div>}>
-          <RouterProvider
-            router={router}
-            fallbackElement={<div>Loading...</div>}
-          />
-        </Suspense>
-      </Provider>
-    </ErrorBoundary>
-  </StrictMode>
+  // <StrictMode>
+  <ErrorBoundary>
+    <Provider store={store}>
+      <Suspense fallback={<div>Loading...</div>}>
+        <RouterProvider
+          router={router}
+          fallbackElement={<div>Loading...</div>}
+        />
+      </Suspense>
+    </Provider>
+  </ErrorBoundary>
+  // </StrictMode>
 );

@@ -1,12 +1,7 @@
-import db from '../../configs/db';
+import db from '@configs/db';
+import { IRefreshToken } from '@interfaces/common/refresh-token';
 
 const { Schema, model } = db;
-
-export interface IRefreshToken {
-  userId: string;
-  tokenId: string;
-  expireAt: Date;
-}
 
 export const refreshTokenSchema = new Schema<IRefreshToken>({
   userId: {

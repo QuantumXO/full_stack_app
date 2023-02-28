@@ -1,15 +1,7 @@
 import db from '../configs/db';
+import { IUser } from '@interfaces/users';
 
 const { Schema, model } = db;
-
-export interface IUser {
-  _id: number;
-  userName: string;
-  location: string;
-  password: string;
-  createdAt: Date;
-  updatedAt?: Date;
-}
 
 export const userSchema = new Schema<IUser>({
   _id: {

@@ -2,9 +2,9 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } from '../constants';
 import dotenv from 'dotenv';
-import { Token, TokenType } from '../services/token';
-import getCustomError from '../services/get-custom-error';
-import { IRefreshToken } from '../models/common/refresh-token';
+import { Token, TokenType } from '@services/token';
+import getCustomError from '@services/get-custom-error';
+import { IRefreshToken } from '@interfaces/common/refresh-token';
 import { Params as ExpressUnlessParamsType, unless } from 'express-unless';
 
 dotenv.config();

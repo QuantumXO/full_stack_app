@@ -1,6 +1,7 @@
 import jwt, { Algorithm } from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
-import { IRefreshToken, RefreshTokenModel } from '../models/common/refresh-token';
+import { RefreshTokenModel } from '@models/common/refresh-token';
+import { IRefreshToken } from '@interfaces/common/refresh-token';
 import { ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } from '../constants';
 import { Response } from 'express';
 

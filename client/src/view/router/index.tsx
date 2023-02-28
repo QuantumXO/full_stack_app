@@ -1,8 +1,8 @@
 import { createBrowserRouter } from 'react-router-dom';
 import React, { lazy } from 'react';
-import App from '../app';
 import { Router as RemixRouter } from '@remix-run/router/dist/router';
 import ProtectedRoute from './components/protectedRoute';
+import App from '../app';
 
 const Home = lazy(() => import('../home'));
 const CMS = lazy(() => import('../cms'));
