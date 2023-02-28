@@ -3,12 +3,12 @@ import express, { Express } from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import rootRouter from './routes';
-import middlewares from './middlewares';
+import middlewares from '@middlewares/index';
 import mongoose from 'mongoose';
 import http from 'http';
 import { Server } from 'socket.io';
 import createIoServer from './configs/socket';
-import { unlessParams } from './middlewares/jwt';
+import { unlessParams } from '@middlewares/jwt';
 
 dotenv.config();
 
