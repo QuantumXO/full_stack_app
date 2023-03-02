@@ -1,13 +1,13 @@
-import React, { ReactElement, ReactNode, useEffect, useState, MouseEvent } from 'react';
+import React, { ReactElement, ReactNode, useEffect, useState, MouseEvent, useContext } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/store';
 import { styled } from '@mui/system';
 import { Divider, Menu, MenuItem } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import socket from '@services/socket';
 import { toast } from 'react-toastify';
 import { INotification } from '@models/common/notifications';
 import Notification from './components/item';
+import { SocketContext, SocketContextType } from '@view/components/context/socket-context';
 
 const StyledButton = styled('div')({
   marginLeft: 12,
@@ -29,6 +29,7 @@ const NewNotificationsIcon = styled('span')({
 export function Notifications(): ReactElement | null {
   const isAuthorized: boolean = useSelector((state: RootState) => state.common.isAuthorized);
   const userId: string | undefined = useSelector((state: RootState) => state.common.userId);
+  const { socket }: SocketContextType = useContext(SocketContext);
   
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notifications, setNotifications] = useState<INotification[] | null>(null);
@@ -38,26 +39,37 @@ export function Notifications(): ReactElement | null {
   let layout: ReactNode = null;
   
   useEffect(() => {
-    // socket.on('notifications:list', getNotificationsHandler);
-    // socket.on('notifications:read', readNotificationHandler);
+    socket.on('notifications:list', getNotificationsHandler);
+    socket.on('notifications:read', readNotificationHandler);
+    socket.on('notifications:create', createNotificationHandler);
   
-    // socket.emit('notifications:list', { userId });
-    // console.log('socket: ', socket);
-    // socket.emit('notifications:read', 321);
+    socket.emit(
+      'notifications:list',
+      { userId },
+    );
+  
+    socket.emit(
+      'TEST',
+      'TEST',
+    );
+    setTimeout((): void => {
+      socket.emit(
+        'TEST3',
+        'TEST',
+      );
+    }, 22000);
+  
+    console.log(socket);
     
     return (): void => {
       socket.off('notifications:list');
+      socket.off('notifications:create');
       socket.off('notifications:read');
     }
+    // eslint-disable-next-line
   }, []);
   
-  function socketTest() {
-    console.log('click');
-    socket.emit('notifications:list');
-  }
-  
   function readNotificationHandler(notification: INotification): void {
-    // setNotifications(notifications);
     console.log('readNotificationHandler() notification: ', notification);
   }
   
@@ -114,7 +126,6 @@ export function Notifications(): ReactElement | null {
   if (isAuthorized) {
     layout = (
       <>
-        <span onClick={socketTest}>Click</span>
         <div style={{ position: 'relative' }}>
           <StyledButton
             aria-label="more"

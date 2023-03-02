@@ -1,7 +1,5 @@
-import db from '../configs/db';
+import { Schema, model } from 'mongoose';
 import { IUser } from '@interfaces/common/users';
-
-const { Schema, model } = db;
 
 export const userSchema = new Schema<IUser>({
   userName: {

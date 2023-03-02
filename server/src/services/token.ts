@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { RefreshTokenModel } from '@models/common/refresh-token';
 import { ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } from '../constants';
 import { Response } from 'express';
+import dotenv from 'dotenv';
 import {
   GetAccessRefreshTokensType,
   IAccessTokenPayload, IDbRefreshToken,
@@ -12,6 +13,8 @@ import {
   IRefreshTokenPayload,
   TokenType
 } from '@interfaces/common/token';
+
+dotenv.config();
 
 export interface ITokenProps {
   userId?: string;
@@ -79,8 +82,6 @@ export class Token {
     await RefreshTokenModel.create({
       tokenId,
       userId: this.userId,
-      expireAt: new Date(Date.now() + refreshTokenMaxAge),
-      // expireAt: new Date(Date.now() + 1000), // TEST 1sec
     });
   }
   

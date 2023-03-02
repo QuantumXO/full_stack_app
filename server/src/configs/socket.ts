@@ -1,18 +1,33 @@
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { httpServer } from '../server';
+import { registerNotificationsHandlers } from '@controllers/common/notifications';
 
-export default function createIoServer(): Server {
-  const ioServer: Server = new Server(
+export function createIoServer(): Server {
+  return new Server(
     httpServer,
     {
+      cookie: true,
+      allowEIO3: true,
+      pingTimeout: 20000,
+      pingInterval: 25000,
+      transports: ['websocket', 'polling'],
       cors: {
         credentials: true,
         origin: process.env.ALLOWED_ORIGIN,
       },
-      cookie: true,
-      transports: ['websocket', 'polling'],
     }
   );
+}
+
+export function onConnection(socket: Socket): void {
+  try {
+    console.log(`⚡: ${socket.id} user just connected!`);
   
-  return ioServer;
+    registerNotificationsHandlers(socket);
+    
+    socket.on('disconnect', () => console.log('🔥: A user disconnected'));
+  } catch (e) {
+    console.log('onConnection() e: ', e);
+    socket.emit('error', e);
+  }
 }

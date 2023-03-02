@@ -1,7 +1,5 @@
-import db from '@configs/db';
+import { Schema, model } from 'mongoose';
 import { IDbNotification } from '@interfaces/common/notifications';
-
-const { Schema, model } = db;
 
 export const notificationSchema = new Schema<IDbNotification>({
   userId: {

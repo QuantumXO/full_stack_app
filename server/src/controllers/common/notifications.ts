@@ -1,14 +1,14 @@
-import { Server, Socket } from 'socket.io';
+import { Socket, } from 'socket.io';
 import {
   ICreateNotification, IDbNotification, INotification, NotificationEventType
 } from '@interfaces/common/notifications';
 import { NotificationModel } from '@models/common/notifications';
-import { ioServer } from '@src/server';
 import customError from '@services/get-custom-error';
+import { ioServer } from '@src/server';
 
-export function registerNotificationsHandlers(io: Server, socket: Socket): void {
-  socket.on('notifications:list', getNotifications);
+export function registerNotificationsHandlers(socket: Socket): void {
   socket.on('notifications:read', () => console.log('read'));
+  socket.on('notifications:list', getNotifications);
 }
 
 async function getNotifications(args: { userId: unknown }): Promise<INotification[]> {
@@ -36,7 +36,7 @@ async function getNotifications(args: { userId: unknown }): Promise<INotificatio
         expireAt
       };
     });
-    
+  
     ioServer.emit('notifications:list', responseNotifications);
   }
   

@@ -4,12 +4,11 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import rootRouter from '@routes/index';
 import middlewares from '@middlewares/index';
-import mongoose from 'mongoose';
 import http from 'http';
-import { Server, Socket } from 'socket.io';
-import createIoServer from '@configs/socket';
 import { unlessParams } from '@middlewares/jwt';
-import { registerNotificationsHandlers } from '@controllers/common/notifications';
+import '@configs/db';
+import { createIoServer, onConnection } from '@configs/socket';
+import { Server } from 'socket.io';
 
 dotenv.config();
 
@@ -18,22 +17,9 @@ export const app: Express = express();
 const PORT = process.env.PORT || 3001;
 
 export const httpServer: http.Server = http.createServer(app);
-
 export const ioServer: Server = createIoServer();
 
-function onConnection(socket: Socket): void {
-  console.log(`⚡: ${socket.id} user just connected!`);
-  
-  socket.emit('connection:sid', socket.id);
-  
-  registerNotificationsHandlers(ioServer, socket);
-  
-  socket.on('disconnect', () => {
-    console.log('🔥: A user disconnected');
-  });
-}
-
-const serverStart = (): void => {
+const serverStart = async (): Promise<void> => {
   console.clear();
   try {
     // -- MIDDLEWARES
@@ -44,22 +30,10 @@ const serverStart = (): void => {
     app.use(rootRouter);
     app.use(errorsHandlerMiddleware);
     // -- MIDDLEWARES
-  
-    ioServer.on('connection', onConnection);
     
-    // app.get('/socket.io');
-
-    mongoose.connection.on('open', function (ref): void {
-      console.log('MongoDB connected.');
-      //trying to get collection names
-      /*mongoose.connection.db.listCollections().toArray(function (err, names) {
-        console.log(names); // [{ name: 'dbname.myCollection' }]
-      });*/
-    })
+    ioServer.on('connection', onConnection);
   
-    httpServer.listen(PORT, (): void => {
-      console.log(`Server listening on ${PORT}`);
-    });
+    httpServer.listen(PORT, (): void => console.log(`Server listening on ${PORT}`));
   } catch (e) {
     console.log('serverStart() e: ', e);
   }
