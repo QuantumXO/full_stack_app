@@ -1,9 +1,9 @@
 import db from '@configs/db';
-import { IRefreshToken } from '@interfaces/common/refresh-token';
+import { IDbRefreshToken } from '@interfaces/common/token';
 
 const { Schema, model } = db;
 
-export const refreshTokenSchema = new Schema<IRefreshToken>({
+export const refreshTokenSchema = new Schema<IDbRefreshToken>({
   userId: {
     type: String,
     required: true,
@@ -18,4 +18,4 @@ export const refreshTokenSchema = new Schema<IRefreshToken>({
   }
 });
 
-export const RefreshTokenModel = model<IRefreshToken>('refresh-tokens', refreshTokenSchema);
+export const RefreshTokenModel = model<IDbRefreshToken>('refresh-tokens', refreshTokenSchema);

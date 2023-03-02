@@ -1,43 +1,21 @@
 import jwt, { Algorithm } from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import { RefreshTokenModel } from '@models/common/refresh-token';
-import { IRefreshToken } from '@interfaces/common/refresh-token';
 import { ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } from '../constants';
 import { Response } from 'express';
+import {
+  GetAccessRefreshTokensType,
+  IAccessTokenPayload, IDbRefreshToken,
+  IGetAccessToken,
+  IGetRefreshToken,
+  IJwtPayload,
+  IRefreshTokenPayload,
+  TokenType
+} from '@interfaces/common/token';
 
-export type TokenType = 'access' | 'refresh';
-
-interface ITokenProps {
+export interface ITokenProps {
   userId?: string;
 }
-
-interface IGetToken {
-  token: string;
-}
-
-interface IJwtPayload {
-  [key: string]: unknown;
-  type: TokenType;
-}
-
-interface IAccessTokenPayload extends IJwtPayload {
-  userId: string;
-}
-interface IRefreshTokenPayload extends IJwtPayload {
-  id: string;
-}
-
-interface IGetAccessToken extends IGetToken {
-  userId: string;
-}
-
-interface IGetRefreshToken extends IGetToken {
-  id: string;
-}
-
-type GetAccessRefreshTokensType = {
-  [key in TokenType]: string;
-};
 
 const accessTokenMaxAge: number = Number(process.env.ACCESS_TOKEN_MAX_AGE);
 const refreshTokenMaxAge: number = Number(process.env.REFRESH_TOKEN_MAX_AGE);
@@ -101,22 +79,14 @@ export class Token {
     await RefreshTokenModel.create({
       tokenId,
       userId: this.userId,
-      // expireAt: new Date(Date.now() + refreshTokenMaxAge),
-      expireAt: new Date(Date.now() + 1000),
+      expireAt: new Date(Date.now() + refreshTokenMaxAge),
+      // expireAt: new Date(Date.now() + 1000), // TEST 1sec
     });
   }
   
   public deleteDbRefreshToken(): void {
     this.throwUserIdError();
     RefreshTokenModel.findOneAndRemove({ userId: this.userId }).exec();
-  }
-  
-  public get getAccessRefreshTokens(): GetAccessRefreshTokensType {
-    this.throwUserIdError();
-    return ({
-      access: this.getNewAccessToken.token,
-      refresh: this.getNewRefreshToken.token,
-    });
   }
   
   public async updateAccessRefreshTokens(): Promise<GetAccessRefreshTokensType> {
@@ -131,12 +101,16 @@ export class Token {
     }
   }
   
-  public getDecoded(token: string): string | jwt.JwtPayload {
-    return jwt.verify(token, process.env.TOKEN_SECRET, { algorithms: [process.env.TOKEN_ALGORITHM as Algorithm] });
+  public getDecoded(token: string): string | IAccessTokenPayload | IRefreshTokenPayload {
+    return jwt.verify(
+      token,
+      process.env.TOKEN_SECRET,
+      { algorithms: [process.env.TOKEN_ALGORITHM as Algorithm] }
+    ) as string | IAccessTokenPayload | IRefreshTokenPayload;
   }
   
-  public async getDbRefreshToken(tokenId: string): Promise<IRefreshToken | undefined> {
-    let result: IRefreshToken | undefined;
+  public async getDbRefreshToken(tokenId: string): Promise<IDbRefreshToken | undefined> {
+    let result: IDbRefreshToken | undefined;
     
     if (tokenId) {
       result = await RefreshTokenModel.findOne({ tokenId }).exec();
@@ -145,16 +119,35 @@ export class Token {
     return result;
   }
   
+  public setCookieToken(res: Response, tokenType: TokenType, token: string): Response {
+    if (tokenType === 'access') {
+      return res
+        .cookie(
+          ACCESS_TOKEN_NAME,
+          token,
+          {
+            httpOnly: false,
+            maxAge: accessTokenMaxAge,
+          }
+        );
+    } else if (tokenType === 'refresh') {
+      return res
+        .cookie(
+          REFRESH_TOKEN_NAME,
+          token,
+          {
+            httpOnly: true,
+            maxAge: refreshTokenMaxAge,
+          }
+        );
+    }
+  }
+  
   public setCookieTokens(accessToken: string, refreshToken: string, res: Response): Response {
-    return res
-      .cookie(ACCESS_TOKEN_NAME, accessToken, {
-        httpOnly: false,
-        maxAge: accessTokenMaxAge,
-      })
-      .cookie(REFRESH_TOKEN_NAME, refreshToken, {
-        httpOnly: true,
-        maxAge: refreshTokenMaxAge,
-      });
+    this.setCookieToken(res, 'access', accessToken);
+    this.setCookieToken(res, 'refresh', refreshToken);
+    
+    return res;
   }
   
   public removeCookieTokens(res: Response): Response {

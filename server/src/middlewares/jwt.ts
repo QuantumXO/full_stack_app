@@ -2,10 +2,10 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } from '../constants';
 import dotenv from 'dotenv';
-import { Token, TokenType } from '@services/token';
-import getCustomError from '@services/get-custom-error';
-import { IRefreshToken } from '@interfaces/common/refresh-token';
+import { Token } from '@services/token';
+import customError from '@services/get-custom-error';
 import { Params as ExpressUnlessParamsType, unless } from 'express-unless';
+import { IDbRefreshToken, TokenType } from '@interfaces/common/token';
 
 dotenv.config();
 
@@ -29,7 +29,7 @@ const jwtMiddleware = async (req: Request, res: Response, next: NextFunction): P
         typeof decoded !== 'string' &&
         decoded?.type !== ACCESS_TOKEN_NAME
       ) {
-        next(getCustomError('UnauthorizedError', 'Invalid token... (access)'));
+        next(customError('UnauthorizedError', 'Invalid token... (access)'));
       }
     } catch (e) {
       next(e);
@@ -42,25 +42,32 @@ const jwtMiddleware = async (req: Request, res: Response, next: NextFunction): P
         const { type, id } = decoded || {};
         
         if (type !== REFRESH_TOKEN_NAME) {
-          next(getCustomError('UnauthorizedError', 'Invalid token... (refresh)'));
+          next(customError('UnauthorizedError', 'Invalid token... (refresh)'));
         }
         
-        const dbRefreshToken: IRefreshToken | undefined = await new Token({}).getDbRefreshToken(id);
+        const dbRefreshToken: IDbRefreshToken | undefined = await new Token({}).getDbRefreshToken(id);
         
         if (dbRefreshToken) {
-          const { access, refresh } = await new Token({ userId: dbRefreshToken.userId })
+          /*const { access, refresh } = await new Token({ userId: dbRefreshToken.userId })
             .updateAccessRefreshTokens();
+          
+            new Token({}).setCookieTokens(access, refresh, res);
+         */
+
+          console.log('dbRefreshToken: ', dbRefreshToken);
+          
+          const accessToken = await new Token({ userId: dbRefreshToken.userId }).getNewAccessToken;
   
-          new Token({}).setCookieTokens(access, refresh, res);
+          new Token({}).setCookieToken(res, 'access', accessToken.token);
         } else {
-          next(getCustomError('UnauthorizedError', 'Invalid token... (refresh) (db)'));
+          next(customError('UnauthorizedError', 'Invalid token... (refresh) (db)'));
         }
       }
     } catch (e) {
       next(e);
     }
   } else {
-    next(getCustomError('UnauthorizedError', 'Invalid tokens...'));
+    next(customError('UnauthorizedError', 'Invalid tokens...'));
   }
   
   next();

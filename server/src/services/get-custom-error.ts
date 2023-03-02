@@ -1,7 +1,12 @@
-export default function (name: string, msg: string): Error {
+export default function (name: string, msg: string, isThrow?: boolean): Error {
   const e: Error = new Error(msg);
   if (name) {
     e.name = name;
   }
-  return e;
+  
+  if (isThrow) {
+    throw e;
+  } else {
+    return e;
+  }
 }

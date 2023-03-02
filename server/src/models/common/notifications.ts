@@ -1,9 +1,9 @@
 import db from '@configs/db';
-import { INotification } from '@interfaces/common/notifications';
+import { IDbNotification } from '@interfaces/common/notifications';
 
 const { Schema, model } = db;
 
-export const notificationSchema = new Schema<INotification>({
+export const notificationSchema = new Schema<IDbNotification>({
   userId: {
     type: String,
     required: true,
@@ -36,4 +36,4 @@ export const notificationSchema = new Schema<INotification>({
   expireAt: Date,
 });
 
-export const NotificationModel = model<INotification>('notifications', notificationSchema);
+export const NotificationModel = model<IDbNotification>('notifications', notificationSchema);

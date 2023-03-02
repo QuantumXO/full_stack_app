@@ -1,12 +1,13 @@
 import { Request, Response } from 'express';
 import { UserModel } from '@models/users';
-import { IUser } from '@interfaces//users';
+import { IUser } from '@interfaces//common/users';
 import bcrypt from 'bcrypt';
-import { Token, TokenType } from '@services/token';
-import { ILoginResponseUser } from '@interfaces/auth';
+import { Token } from '@services/token';
+import { ILoginResponseUser } from '@interfaces/common/auth';
 import dotenv from 'dotenv';
 import { get } from 'lodash';
-import NotificationsController from '@controllers/notifications';
+import NotificationsController from '@controllers/common/notifications';
+import { TokenType } from '@interfaces/common/token';
 
 dotenv.config();
 

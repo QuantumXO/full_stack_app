@@ -9,11 +9,9 @@ import http from 'http';
 import { Server, Socket } from 'socket.io';
 import createIoServer from '@configs/socket';
 import { unlessParams } from '@middlewares/jwt';
-import { registerNotificationsHandlers } from '@controllers/notifications';
+import { registerNotificationsHandlers } from '@controllers/common/notifications';
 
 dotenv.config();
-
-console.clear();
 
 const { jwtMiddleware, errorsHandlerMiddleware, corsMiddleware } = middlewares;
 export const app: Express = express();
@@ -35,7 +33,8 @@ function onConnection(socket: Socket): void {
   });
 }
 
-const serverStart = async () => {
+const serverStart = (): void => {
+  console.clear();
   try {
     // -- MIDDLEWARES
     app.use(corsMiddleware);
