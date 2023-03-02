@@ -4,10 +4,10 @@ import { Router as RemixRouter } from '@remix-run/router/dist/router';
 import ProtectedRoute from './components/protectedRoute';
 import App from '../app';
 
-const Home = lazy(() => import('../home'));
-const CMS = lazy(() => import('../cms'));
-const Login = lazy(() => import('../login'));
-const SignUp = lazy(() => import('../sign-up'));
+const Home = lazy(() => import('@view/home'));
+const CMS = lazy(() => import('@view/cms'));
+const Login = lazy(() => import('@view/login'));
+const SignUp = lazy(() => import('@view/sign-up'));
 
 const router: RemixRouter = createBrowserRouter([
   {

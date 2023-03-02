@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "@src/*": ["./*"],
+      "@selectors/*": ["selectors/*"],
+      "@models/*": ["models/*"],
+      "@view/*": ["view/*"],
+      "@sagas/*": ["sagas/*"],
+      "@services/*": ["services/*"],
+      "@assets/*": ["assets/*"],
+      "@data/*": ["data/*"],
+      "@constants/*": ["constants/*"],
+      "@store/*": ["store/*"]
+    }
+  }
+}

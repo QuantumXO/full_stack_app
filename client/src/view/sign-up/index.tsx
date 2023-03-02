@@ -1,8 +1,8 @@
 import { ReactElement, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
-import { axiosInstance } from '../../services/axios';
+import { RootState } from '@src/store';
+import { axiosInstance } from '@services/axios';
 import { AxiosResponse } from 'axios';
 import { useTranslation } from 'react-i18next';
 import { Typography, Box, TextField, Container, Button, FormControl } from '@mui/material';

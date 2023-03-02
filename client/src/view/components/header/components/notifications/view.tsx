@@ -1,12 +1,12 @@
 import React, { ReactElement, ReactNode, useEffect, useState, MouseEvent } from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../../../store';
+import { RootState } from '@src/store';
 import { styled } from '@mui/system';
 import { Divider, Menu, MenuItem } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import socket from '../../../../../services/socket';
+import socket from '@services/socket';
 import { toast } from 'react-toastify';
-import { INotification } from '../../../../../models/common/notifications';
+import { INotification } from '@models/common/notifications';
 import Notification from './components/item';
 
 const StyledButton = styled('div')({

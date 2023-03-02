@@ -1,11 +1,11 @@
 import { Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
-import router from './view/router';
+import router from '@view/router';
 import { RouterProvider } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './store';
-import './services/i18n';
-import ErrorBoundary from './view/components/error-boundary';
+import '@services/i18n';
+import ErrorBoundary from '@view/components/error-boundary';
 
 const root = createRoot(
   document.querySelector('#root') as HTMLElement
