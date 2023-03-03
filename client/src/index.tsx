@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import { store } from './store';
 import '@services/i18n';
 import ErrorBoundary from '@view/common/error-boundary';
-import SocketProvider from '@view/common/context/socket-context';
+import { SocketProvider } from '@view/common/contexts/socket';
 // import '@services/socket';
 
 const root = createRoot(

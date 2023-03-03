@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode, useEffect, useState, MouseEvent, useContext } from 'react';
+import React, { ReactElement, ReactNode, useEffect, useState, MouseEvent } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/store';
 import { styled } from '@mui/system';
@@ -7,8 +7,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import { toast } from 'react-toastify';
 import { INotification, NotificationsEvents } from '@models/common/notifications';
 import Notification from './components/item';
-import { SocketContext, SocketContextType } from '@view/common/context/socket-context';
-import { Socket } from 'socket.io-client';
+import { useSocketContext } from '@view/common/contexts/socket';
 
 const StyledButton = styled('div')({
   marginLeft: 12,
@@ -30,7 +29,7 @@ const NewNotificationsIcon = styled('span')({
 export function Notifications(): ReactElement | null {
   const isAuthorized: boolean = useSelector((state: RootState) => state.common.isAuthorized);
   const userId: string | undefined = useSelector((state: RootState) => state.common.userId);
-  const { socket, isConnected }: SocketContextType = useContext(SocketContext);
+  const { socket, isConnected, socketEmit } = useSocketContext();
   
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notifications, setNotifications] = useState<INotification[] | null>(null);
@@ -41,23 +40,17 @@ export function Notifications(): ReactElement | null {
   
   useEffect((): void => {
     if (isConnected) {
-      socketEmit(socket, NotificationsEvents.GET_NOTIFICATIONS_LIST, { userId });
-  
       socket.on(NotificationsEvents.GET_NOTIFICATIONS_LIST, getNotificationsHandler);
       socket.on(NotificationsEvents.READ_NOTIFICATION, readNotificationHandler);
       socket.on(NotificationsEvents.CREATE_NOTIFICATION, createNotificationHandler);
+  
+      socketEmit(NotificationsEvents.GET_NOTIFICATIONS_LIST, { userId });
     }
-    
     // eslint-disable-next-line
   }, [isConnected]);
   
   // eslint-disable-next-line
   useEffect(() => offSockets, []);
-  
-  const socketEmit = (socket: Socket, event: string, data: any): Socket => {
-    console.log('socketEmit: ', event);
-    return socket.emit(event, data);
-  }
   
   function offSockets(): void {
     socket.off(NotificationsEvents.GET_NOTIFICATIONS_LIST);
@@ -83,8 +76,7 @@ export function Notifications(): ReactElement | null {
   const onCloseList = (): void => setAnchorEl(null);
   
   function onReadNotification(notificationId: string): void {
-    console.log('onReadNotification() notificationId: ', notificationId);
-    socket.emit(NotificationsEvents.READ_NOTIFICATION, { id: notificationId });
+    socketEmit(NotificationsEvents.READ_NOTIFICATION, { id: notificationId });
   }
   
   function renderList(): ReactNode {

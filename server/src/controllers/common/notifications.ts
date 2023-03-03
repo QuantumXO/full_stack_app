@@ -64,9 +64,9 @@ async function createNotification(
           userId,
           eventType,
           type: 'success',
+          author: 'system',
           title: 'Login Success!',
           content: 'You have been successfully logged into platform',
-          author: 'system',
           createdAt: new Date(),
         };
         onlyCreateNew = false;
