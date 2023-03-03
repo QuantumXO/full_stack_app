@@ -7,7 +7,7 @@ import customError from '@services/get-custom-error';
 import { ioServer } from '@src/server';
 
 export function registerNotificationsHandlers(socket: Socket): void {
-  socket.on(NotificationsEvents.READ_NOTIFICATION, () => console.log('read'));
+  socket.on(NotificationsEvents.READ_NOTIFICATION, readNotification);
   socket.on(NotificationsEvents.GET_NOTIFICATIONS_LIST, getNotifications);
 }
 
@@ -18,12 +18,17 @@ async function getNotifications(args: { userId: unknown }): Promise<INotificatio
   if (typeof userId === 'string') {
     const notifications: IDbNotification[] = await NotificationModel
       .find({ userId })
-      .sort('createdAt')
+      .sort('-createdAt')
       .select('_id eventType author content createdAt title type readAt expireAt')
       .exec();
+    
+    let newNotificationsCount: number = 0;
   
     const responseNotifications: INotification[] = notifications.map((item: IDbNotification): INotification => {
       const { _id, eventType, type, createdAt, author, content, title, readAt, expireAt } = item;
+      
+      !readAt && newNotificationsCount++;
+      
       return {
         id: String(_id),
         eventType,
@@ -37,14 +42,61 @@ async function getNotifications(args: { userId: unknown }): Promise<INotificatio
       };
     });
   
-    ioServer.emit(NotificationsEvents.GET_NOTIFICATIONS_LIST, responseNotifications);
+    ioServer.emit(
+      NotificationsEvents.GET_NOTIFICATIONS_LIST,
+      {
+        notifications: responseNotifications,
+        newNotificationsCount,
+      }
+    );
   }
   
   return result;
 }
 
 async function readNotification(args: { id: string }): Promise<void> {
-  console.log('notifications:read args: ', args);
+  const { id } = args;
+  
+  try {
+    const readAt = new Date();
+    
+    const selectedNotification: IDbNotification = await NotificationModel.findByIdAndUpdate(
+      id,
+      { readAt },
+      {
+        new: true,
+        upsert: true, // Make this update into an upsert
+      }
+    ).exec();
+    
+    const { _id, expireAt, author, content, title, type, createdAt, eventType, userId } = selectedNotification;
+    
+    const responseNotification: INotification = {
+      id: String(_id),
+      eventType,
+      type,
+      createdAt,
+      author,
+      content,
+      title,
+      readAt,
+      expireAt
+    };
+  
+    const unreadNotifications: IDbNotification[] = await NotificationModel
+      .find({ readAt: { $exists: false }, userId })
+      .exec()
+  
+    ioServer.emit(
+      NotificationsEvents.READ_NOTIFICATION,
+      {
+        notification: responseNotification,
+        newNotificationsCount: unreadNotifications.length,
+      }
+    );
+  } catch (e) {
+    customError(e?.name, e?.message, true);
+  }
 }
 
 async function createNotification(
@@ -53,7 +105,6 @@ async function createNotification(
 ): Promise<INotification> {
   const { userId } = params as { userId: string };
   
-  let onlyCreateNew: boolean = true;
   let newNotification: ICreateNotification;
   let createdNotification: IDbNotification;
   
@@ -69,22 +120,12 @@ async function createNotification(
           content: 'You have been successfully logged into platform',
           createdAt: new Date(),
         };
-        onlyCreateNew = false;
         break;
       }
       default: customError(null, 'createNotification() invalid event type', true);
     }
-    
-    if (onlyCreateNew) {
-      createdNotification = await NotificationModel.create(newNotification);
-    } else {
-      createdNotification = await NotificationModel
-        .findOneAndUpdate({ userId, eventType }, newNotification, {
-          new: true,
-          upsert: true, // Make this update into an upsert
-        })
-        .exec();
-    }
+  
+    createdNotification = await NotificationModel.create(newNotification);
     
     if (createdNotification) {
       const { _id, eventType, type, createdAt, author, content, title, readAt, expireAt } = createdNotification;

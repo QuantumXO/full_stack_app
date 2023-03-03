@@ -1,4 +1,4 @@
-export default function (name: string, msg: string, isThrow?: boolean): Error {
+export default function (name: string = 'Error', msg: string = 'Something went wrong', isThrow?: boolean): Error {
   const e: Error = new Error(msg);
   if (name) {
     e.name = name;

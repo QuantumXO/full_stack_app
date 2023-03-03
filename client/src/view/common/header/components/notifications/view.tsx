@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode, useEffect, useState, MouseEvent } from 'react';
+import React, { MouseEvent, ReactElement, ReactNode, useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/store';
 import { styled } from '@mui/system';
@@ -8,6 +8,16 @@ import { toast } from 'react-toastify';
 import { INotification, NotificationsEvents } from '@models/common/notifications';
 import Notification from './components/item';
 import { useSocketContext } from '@view/common/contexts/socket';
+
+interface IGetNotificationsHandlerArgs {
+  notifications: INotification[];
+  newNotificationsCount: number;
+}
+
+interface IReadNotificationHandlerArgs {
+  notification: INotification;
+  newNotificationsCount: number;
+}
 
 const StyledButton = styled('div')({
   marginLeft: 12,
@@ -32,17 +42,17 @@ export function Notifications(): ReactElement | null {
   const { socket, isConnected, socketEmit } = useSocketContext();
   
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [notifications, setNotifications] = useState<INotification[] | null>(null);
+  const [notifications, setNotifications] = useState<INotification[]>([]);
+  const [newNotificationsCount, setNewNotificationsCount] = useState<number>(0);
   
   const showList: boolean = Boolean(anchorEl);
-  let isExistNewNotification: boolean = true;
   let layout: ReactNode = null;
   
   useEffect((): void => {
     if (isConnected) {
       socket.on(NotificationsEvents.GET_NOTIFICATIONS_LIST, getNotificationsHandler);
-      socket.on(NotificationsEvents.READ_NOTIFICATION, readNotificationHandler);
       socket.on(NotificationsEvents.CREATE_NOTIFICATION, createNotificationHandler);
+      socket.on(NotificationsEvents.READ_NOTIFICATION, readNotificationHandler);
   
       socketEmit(NotificationsEvents.GET_NOTIFICATIONS_LIST, { userId });
     }
@@ -58,12 +68,20 @@ export function Notifications(): ReactElement | null {
     socket.off(NotificationsEvents.READ_NOTIFICATION);
   }
   
-  function readNotificationHandler(notification: INotification): void {
-    console.log('readNotificationHandler() notification: ', notification);
+  function getNotificationsHandler(args: IGetNotificationsHandlerArgs): void {
+    const { notifications: newNotifications, newNotificationsCount } = args;
+    setNotifications(newNotifications);
+    setNewNotificationsCount(newNotificationsCount);
   }
   
-  function getNotificationsHandler(notifications: INotification[]): void {
-    setNotifications(notifications);
+  const readNotificationHandler = (args: IReadNotificationHandlerArgs): void => {
+    const { notification, newNotificationsCount } = args;
+    setNotifications((prevNotifications: INotification[]): INotification[] => {
+      return [...prevNotifications].map((item: INotification): INotification => {
+        return item.id === notification.id ? notification : item;
+      });
+    });
+    setNewNotificationsCount(newNotificationsCount);
   }
   
   function createNotificationHandler(newNotification: INotification): void {
@@ -92,11 +110,11 @@ export function Notifications(): ReactElement | null {
         PaperProps={{
           style: {
             width: 350,
-            maxHeight: 24 * 4.5,
+            maxHeight: 316,
           },
         }}
       >
-        {Array.isArray(notifications)
+        {notifications.length
           ? notifications.map((item: INotification): ReactElement => {
             const { id } = item;
             return <Notification key={id} {...item} onRead={onReadNotification} />;
@@ -124,7 +142,7 @@ export function Notifications(): ReactElement | null {
             onClick={onShowList}
           >
             <NotificationsIcon/>
-            {isExistNewNotification && <NewNotificationsIcon/>}
+            {!!newNotificationsCount && <NewNotificationsIcon/>}
           </StyledButton>
           {renderList()}
         </div>

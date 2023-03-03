@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import cx from 'classnames';
 import { MenuItem, Typography } from '@mui/material';
-import { INotification } from '../../../../../../../models/common/notifications';
+import { INotification } from '@models/common/notifications';
 
 export interface IProps extends INotification {
   onRead: (id: string) => void;
@@ -11,7 +11,7 @@ export function Notification(props: IProps): ReactElement {
   const { id, title, author = '', content, readAt, onRead } = props;
   const isNew: boolean = !readAt;
   
-  const onHandleRead = (): void => onRead(id);
+  const onHandleRead = (): void | false => isNew && onRead(id);
   
   return (
     <MenuItem

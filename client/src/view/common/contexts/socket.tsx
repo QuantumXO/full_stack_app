@@ -72,10 +72,13 @@ export function SocketProvider({ children }: ISocketContextProviderProps): React
     if (isAuthorized) {
       socket.connect();
   
-      socket.onAny((event, ...args) => console.log(`${event}: `, args));
+      // socket.onAny((event, ...args) => console.log(`${event}: `, args));
   
       socket.on('connect', (): void => setIsConnected(true));
-      socket.on('disconnect', (): void => setIsConnected(false));
+      socket.on('disconnect', (): void => {
+        socket.disconnect();
+        setIsConnected(false);
+      });
       socket.on('connect_error', console.error);
       socket.on('error', console.error);
     } else {
