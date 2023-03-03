@@ -1,6 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import { httpServer } from '../server';
 import { registerNotificationsHandlers } from '@controllers/common/notifications';
+import { ALLOWED_ORIGINS } from '@src/constants';
 
 export function createIoServer(): Server {
   return new Server(
@@ -13,7 +14,7 @@ export function createIoServer(): Server {
       transports: ['websocket', 'polling'],
       cors: {
         credentials: true,
-        origin: process.env.ALLOWED_ORIGIN,
+        origin: ALLOWED_ORIGINS,
       },
     }
   );

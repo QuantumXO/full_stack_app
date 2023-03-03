@@ -1,9 +1,9 @@
 import cors, { CorsOptions } from 'cors';
+import { ALLOWED_ORIGINS } from '@src/constants';
 
-const originslist: string[] = [process.env.ALLOWED_ORIGIN];
 const corsOptions: CorsOptions = {
   origin: function (origin: string | undefined, callback) {
-    if (originslist.indexOf(origin) !== -1) {
+    if (ALLOWED_ORIGINS.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
