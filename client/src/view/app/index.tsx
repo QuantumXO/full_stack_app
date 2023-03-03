@@ -2,7 +2,7 @@ import React, { memo, ReactElement, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { Box } from '@mui/material';
-import Header from '../components/header';
+import Header from '../common/header';
 
 import 'react-toastify/dist/ReactToastify.css';
 

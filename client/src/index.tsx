@@ -5,8 +5,8 @@ import { RouterProvider } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './store';
 import '@services/i18n';
-import ErrorBoundary from '@view/components/error-boundary';
-import SocketProvider from '@view/components/context/socket-context';
+import ErrorBoundary from '@view/common/error-boundary';
+import SocketProvider from '@view/common/context/socket-context';
 // import '@services/socket';
 
 const root = createRoot(

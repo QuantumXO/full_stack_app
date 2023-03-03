@@ -5,9 +5,10 @@ import { styled } from '@mui/system';
 import { Divider, Menu, MenuItem } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { toast } from 'react-toastify';
-import { INotification } from '@models/common/notifications';
+import { INotification, NotificationsEvents } from '@models/common/notifications';
 import Notification from './components/item';
-import { SocketContext, SocketContextType } from '@view/components/context/socket-context';
+import { SocketContext, SocketContextType } from '@view/common/context/socket-context';
+import { Socket } from 'socket.io-client';
 
 const StyledButton = styled('div')({
   marginLeft: 12,
@@ -29,7 +30,7 @@ const NewNotificationsIcon = styled('span')({
 export function Notifications(): ReactElement | null {
   const isAuthorized: boolean = useSelector((state: RootState) => state.common.isAuthorized);
   const userId: string | undefined = useSelector((state: RootState) => state.common.userId);
-  const { socket }: SocketContextType = useContext(SocketContext);
+  const { socket, isConnected }: SocketContextType = useContext(SocketContext);
   
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notifications, setNotifications] = useState<INotification[] | null>(null);
@@ -38,36 +39,31 @@ export function Notifications(): ReactElement | null {
   let isExistNewNotification: boolean = true;
   let layout: ReactNode = null;
   
-  useEffect(() => {
-    socket.on('notifications:list', getNotificationsHandler);
-    socket.on('notifications:read', readNotificationHandler);
-    socket.on('notifications:create', createNotificationHandler);
+  useEffect((): void => {
+    if (isConnected) {
+      socketEmit(socket, NotificationsEvents.GET_NOTIFICATIONS_LIST, { userId });
   
-    socket.emit(
-      'notifications:list',
-      { userId },
-    );
-  
-    socket.emit(
-      'TEST',
-      'TEST',
-    );
-    setTimeout((): void => {
-      socket.emit(
-        'TEST3',
-        'TEST',
-      );
-    }, 22000);
-  
-    console.log(socket);
-    
-    return (): void => {
-      socket.off('notifications:list');
-      socket.off('notifications:create');
-      socket.off('notifications:read');
+      socket.on(NotificationsEvents.GET_NOTIFICATIONS_LIST, getNotificationsHandler);
+      socket.on(NotificationsEvents.READ_NOTIFICATION, readNotificationHandler);
+      socket.on(NotificationsEvents.CREATE_NOTIFICATION, createNotificationHandler);
     }
+    
     // eslint-disable-next-line
-  }, []);
+  }, [isConnected]);
+  
+  // eslint-disable-next-line
+  useEffect(() => offSockets, []);
+  
+  const socketEmit = (socket: Socket, event: string, data: any): Socket => {
+    console.log('socketEmit: ', event);
+    return socket.emit(event, data);
+  }
+  
+  function offSockets(): void {
+    socket.off(NotificationsEvents.GET_NOTIFICATIONS_LIST);
+    socket.off(NotificationsEvents.CREATE_NOTIFICATION);
+    socket.off(NotificationsEvents.READ_NOTIFICATION);
+  }
   
   function readNotificationHandler(notification: INotification): void {
     console.log('readNotificationHandler() notification: ', notification);
@@ -88,7 +84,7 @@ export function Notifications(): ReactElement | null {
   
   function onReadNotification(notificationId: string): void {
     console.log('onReadNotification() notificationId: ', notificationId);
-    socket.emit('notifications:read', { id: notificationId });
+    socket.emit(NotificationsEvents.READ_NOTIFICATION, { id: notificationId });
   }
   
   function renderList(): ReactNode {

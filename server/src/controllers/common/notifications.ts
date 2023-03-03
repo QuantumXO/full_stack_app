@@ -1,14 +1,14 @@
 import { Socket, } from 'socket.io';
 import {
-  ICreateNotification, IDbNotification, INotification, NotificationEventType
+  ICreateNotification, IDbNotification, INotification, NotificationEventType, NotificationsEvents
 } from '@interfaces/common/notifications';
 import { NotificationModel } from '@models/common/notifications';
 import customError from '@services/get-custom-error';
 import { ioServer } from '@src/server';
 
 export function registerNotificationsHandlers(socket: Socket): void {
-  socket.on('notifications:read', () => console.log('read'));
-  socket.on('notifications:list', getNotifications);
+  socket.on(NotificationsEvents.READ_NOTIFICATION, () => console.log('read'));
+  socket.on(NotificationsEvents.GET_NOTIFICATIONS_LIST, getNotifications);
 }
 
 async function getNotifications(args: { userId: unknown }): Promise<INotification[]> {
@@ -37,7 +37,7 @@ async function getNotifications(args: { userId: unknown }): Promise<INotificatio
       };
     });
   
-    ioServer.emit('notifications:list', responseNotifications);
+    ioServer.emit(NotificationsEvents.GET_NOTIFICATIONS_LIST, responseNotifications);
   }
   
   return result;
@@ -101,7 +101,7 @@ async function createNotification(
         expireAt,
       };
       
-      ioServer.emit('notifications:create', responseNotification);
+      ioServer.emit(NotificationsEvents.CREATE_NOTIFICATION, responseNotification);
       
       return responseNotification;
     } else {

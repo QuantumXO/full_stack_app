@@ -41,17 +41,11 @@ export const SocketContext: Context<SocketContextType> = createContext<SocketCon
 function SocketProvider({ children }: ISocketContextProviderProps): ReactElement {
   const isAuthorized: boolean = useSelector((state: RootState) => state.common.isAuthorized);
   
+  
   const [socket] = useState<Socket>(initialSocket);
   const [isConnected, setIsConnected] = useState<boolean>(socket.connected);
   
   useEffect(() => {
-    socket.onAny((event, ...args) => console.log(`${event}: `, args));
-    
-    socket.on('connect', (): void => setIsConnected(true));
-    socket.on('disconnect', (): void => setIsConnected(false));
-    socket.on('connect_error', console.error);
-    socket.on('error', console.error);
-    
     return (): void => {
       socket.off('connection:sid');
       socket.off('connect');
@@ -62,7 +56,18 @@ function SocketProvider({ children }: ISocketContextProviderProps): ReactElement
   }, []);
   
   useEffect((): void => {
-    isAuthorized && socket.connect();
+    if (isAuthorized) {
+      socket.connect();
+  
+      socket.onAny((event, ...args) => console.log(`${event}: `, args));
+  
+      socket.on('connect', (): void => setIsConnected(true));
+      socket.on('disconnect', (): void => setIsConnected(false));
+      socket.on('connect_error', console.error);
+      socket.on('error', console.error);
+    } else {
+      socket.disconnect();
+    }
     // eslint-disable-next-line
   }, [isAuthorized]);
   

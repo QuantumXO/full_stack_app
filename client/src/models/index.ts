@@ -1,4 +1,4 @@
-import * as common from './common';
+import common from './common';
 
 export default {
   common,

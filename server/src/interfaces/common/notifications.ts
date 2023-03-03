@@ -33,3 +33,9 @@ export interface IDbNotification {
   readAt?: Date;
   expireAt?: Date;
 }
+
+export enum NotificationsEvents {
+  'READ_NOTIFICATION' = 'notifications:read',
+  'GET_NOTIFICATIONS_LIST' = 'notifications:list',
+  'CREATE_NOTIFICATION' = 'notifications:create',
+}

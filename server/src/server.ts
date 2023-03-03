@@ -31,6 +31,8 @@ const serverStart = async (): Promise<void> => {
     app.use(errorsHandlerMiddleware);
     // -- MIDDLEWARES
     
+    app.get('/socket.io');
+    
     ioServer.on('connection', onConnection);
   
     httpServer.listen(PORT, (): void => console.log(`Server listening on ${PORT}`));
