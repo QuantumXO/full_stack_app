@@ -2,7 +2,7 @@ import { configureStore, createSlice } from '@reduxjs/toolkit';
 import { Slice } from '@reduxjs/toolkit/src/createSlice';
 import jsCookie from 'js-cookie';
 import { ACCESS_TOKEN_NAME } from '../constants';
-import { IUser } from '../models/common/users';
+import { IUser } from '@models/common/users';
 import getJWTPayload from '../services/get-jwt-payload';
 
 interface ICommonState {

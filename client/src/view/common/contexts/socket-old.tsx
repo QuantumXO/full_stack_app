@@ -54,7 +54,7 @@ const initialContext: InitialSocketContextType = {
   socketId: socket.id,
 };
 
-IS_DEV && socket.onAny((event, ...args) => console.info(`${event}: `, args));
+IS_DEV && socket.onAny((event, ...args) => console.log(`${event}: `, args));
 
 const SocketContext: Context<InitialSocketContextType> = createContext<InitialSocketContextType>(initialContext);
 
@@ -74,6 +74,7 @@ export function SocketProvider({ children }: ISocketContextProviderProps): React
   const isAuthorized: boolean = useSelector((state: RootState) => state.common.isAuthorized);
   
   const [isConnected, setIsConnected] = useState<boolean>(() => socket.connected);
+  const [subscriptionEvents, setSubscriptionEvents] = useState<IEventsSubscriptionEvent[]>(() => []);
   
   useEffect(() => {
     return onSocketDisconnect;
@@ -83,14 +84,6 @@ export function SocketProvider({ children }: ISocketContextProviderProps): React
   useEffect((): void => {
     if (isAuthorized) {
       onSocketConnect();
-  
-      onSubscribeEvents([
-        { [SocketCommonEvents.CONNECT]: onSetIsConnected},
-        { [SocketCommonEvents.DISCONNECT]: onSetIsConnected},
-        { [SocketCommonEvents.CONNECT_ERROR]: onSocketConnect},
-        { [SocketCommonEvents.ERROR]: console.error},
-        { [SocketCommonEvents.RECONNECT]: console.log},
-      ]);
     } else {
       socket.removeAllListeners();
       // socket.offAny();
@@ -99,21 +92,45 @@ export function SocketProvider({ children }: ISocketContextProviderProps): React
     // eslint-disable-next-line
   }, [isAuthorized]);
   
+  useEffect((): void => {
+    onSubscribeEvents([
+      { [SocketCommonEvents.CONNECT]: onSetIsConnected},
+      { [SocketCommonEvents.DISCONNECT]: onSetIsConnected},
+      { [SocketCommonEvents.CONNECT_ERROR]: onSocketConnect},
+      { [SocketCommonEvents.ERROR]: console.error},
+      { [SocketCommonEvents.RECONNECT]: console.log},
+    ]);
+  }, [isConnected]);
+  
+  useEffect((): void => {
+    isConnected && eventsSubscription();
+  }, [isConnected, JSON.stringify(subscriptionEvents)]);
+  
   const onSubscribeEvents = (events: IEventsSubscriptionEvent[]): void => {
-    events.forEach((event: IEventsSubscriptionEvent): void => {
-      const [eventName, eventCb] = Object.entries(event)[0];
-      socket.on(eventName, eventCb);
-    });
+    setSubscriptionEvents((prevEvents: IEventsSubscriptionEvent[]) => [...prevEvents, ...events]);
   };
   
   const onUnsubscribeEvents = (events: (IEventsSubscriptionEvent | string)[]): void => {
     events.forEach((event: IEventsSubscriptionEvent | string): void => {
-      if (typeof event === 'string') {
-        socket.off(event);
-      } else {
-        const [eventName, eventCb] = Object.entries(event)[0];
-        socket.off(eventName, eventCb);
-      }
+      setSubscriptionEvents((prevEvents: IEventsSubscriptionEvent[]) => {
+        let result: IEventsSubscriptionEvent[] = [];
+        if (typeof event === 'string') {
+          result = prevEvents.filter((ev: IEventsSubscriptionEvent) => {
+            const [evName] = Object.entries(ev)[0];
+            return evName !== event;
+          });
+        } else {
+          const [eventName, eventCb] = Object.entries(event)[0];
+          result = prevEvents.filter((ev: IEventsSubscriptionEvent) => {
+            const [evName, evCb] = Object.entries(ev)[0];
+            return evName !== eventName && evCb.toString() !== eventCb.toString();
+          });
+        }
+        
+        return result;
+      });
+  
+      eventsUnsubscription(events);
     });
   };
   
@@ -136,6 +153,36 @@ export function SocketProvider({ children }: ISocketContextProviderProps): React
     }
   }
   
+  const eventsSubscription = (): void => {
+    subscriptionEvents.forEach((event: IEventsSubscriptionEvent): void => {
+      const [eventName, eventCb] = Object.entries(event)[0];
+      socket.on(eventName, eventCb);
+  
+      // When event subscribed, remove from subscriptionEvents queue
+      setSubscriptionEvents((prevEvents: IEventsSubscriptionEvent[]) => {
+        return prevEvents.filter((ev: IEventsSubscriptionEvent) => {
+          const [evName, evCb] = Object.entries(ev)[0];
+          return eventName !== evName && eventCb.toString() !== evCb.toString();
+        });
+      });
+    });
+  };
+  
+  const eventsUnsubscription = (events: (IEventsSubscriptionEvent | string)[]): void => {
+    if (Array.isArray(events)) {
+      events.forEach((event: IEventsSubscriptionEvent | string): void => {
+        if (typeof event === 'string') {
+          socket.off(event);
+        } else {
+          const [eventName, cb] = Object.entries(event)[0];
+          socket.off(eventName, cb);
+        }
+      });
+    } else {
+      throw new Error('eventsUnsubscription() Invalid events type');
+    }
+  };
+  
   const contextValue: SocketContextType = useMemo(
     (): SocketContextType => ({
       socket,
@@ -143,7 +190,7 @@ export function SocketProvider({ children }: ISocketContextProviderProps): React
       isConnected,
       socketEmit,
       onSubscribeEvents,
-      onUnsubscribeEvents
+      onUnsubscribeEvents,
     }),
     [
       socket,

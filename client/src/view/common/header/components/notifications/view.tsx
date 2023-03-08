@@ -1,4 +1,4 @@
-import React, { MouseEvent, ReactElement, ReactNode, useCallback, useEffect, useState } from 'react';
+import React, { MouseEvent, ReactElement, ReactNode, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@src/store';
 import { styled } from '@mui/system';
@@ -28,18 +28,27 @@ const StyledButton = styled('div')({
 const NewNotificationsIcon = styled('span')({
   right: '0',
   top: '0',
-  width: 12,
-  height: 12,
+  width: 14,
+  height: 14,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   borderRadius: '50%',
   position: 'absolute',
   backgroundColor: 'red',
   zIndex: '99',
+  '&::before': {
+    display: 'inline-block',
+    content: 'attr(data-count)',
+    fontSize: 9,
+    color: '#ffffff',
+  }
 });
 
 export function Notifications(): ReactElement | null {
   const isAuthorized: boolean = useSelector((state: RootState) => state.common.isAuthorized);
   const userId: string | undefined = useSelector((state: RootState) => state.common.userId);
-  const { socket, isConnected, socketEmit } = useSocketContext();
+  const { isConnected, socketEmit, onSubscribeEvents, onUnsubscribeEvents } = useSocketContext();
   
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notifications, setNotifications] = useState<INotification[]>([]);
@@ -50,9 +59,11 @@ export function Notifications(): ReactElement | null {
   
   useEffect((): void => {
     if (isConnected) {
-      socket.on(NotificationsEvents.GET_NOTIFICATIONS_LIST, getNotificationsHandler);
-      socket.on(NotificationsEvents.CREATE_NOTIFICATION, createNotificationHandler);
-      socket.on(NotificationsEvents.READ_NOTIFICATION, readNotificationHandler);
+      onSubscribeEvents([
+        { [NotificationsEvents.GET_NOTIFICATIONS_LIST]: getNotificationsHandler },
+        { [NotificationsEvents.CREATE_NOTIFICATION]: createNotificationHandler },
+        { [NotificationsEvents.READ_NOTIFICATION]: readNotificationHandler },
+      ]);
   
       socketEmit(NotificationsEvents.GET_NOTIFICATIONS_LIST, { userId });
     }
@@ -63,9 +74,11 @@ export function Notifications(): ReactElement | null {
   useEffect(() => offSockets, []);
   
   function offSockets(): void {
-    socket.off(NotificationsEvents.GET_NOTIFICATIONS_LIST);
-    socket.off(NotificationsEvents.CREATE_NOTIFICATION);
-    socket.off(NotificationsEvents.READ_NOTIFICATION);
+    onUnsubscribeEvents([
+      NotificationsEvents.GET_NOTIFICATIONS_LIST,
+      NotificationsEvents.CREATE_NOTIFICATION,
+      NotificationsEvents.READ_NOTIFICATION,
+    ]);
   }
   
   function getNotificationsHandler(args: IGetNotificationsHandlerArgs): void {
@@ -142,7 +155,7 @@ export function Notifications(): ReactElement | null {
             onClick={onShowList}
           >
             <NotificationsIcon/>
-            {!!newNotificationsCount && <NewNotificationsIcon/>}
+            {!!newNotificationsCount && <NewNotificationsIcon data-count={newNotificationsCount}/>}
           </StyledButton>
           {renderList()}
         </div>

@@ -83,7 +83,8 @@ export function Header(): ReactElement {
             justifyContent: 'flex-end',
           }}
         >
-          <Notifications />
+          {/* TODO: check auth condition */}
+          {isAuthorized && <Notifications/>}
           <nav>
             <Link
               to="/home"

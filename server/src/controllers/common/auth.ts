@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { UserModel } from '@models/users';
 import { IUser } from '@interfaces//common/users';
 import bcrypt from 'bcrypt';
-import { Token } from '@services/token';
+import Token from '@services/token';
 import { ILoginResponseUser } from '@interfaces/common/auth';
 import dotenv from 'dotenv';
 import { get } from 'lodash';
@@ -41,9 +41,9 @@ async function login(req: Request, res: Response): Promise<Response> {
           const {
             access: accessToken,
             refresh: refreshToken
-          } = await new Token({ userId: responseUser.id }).updateAccessRefreshTokens();
+          } = await Token.updateAccessRefreshTokens(responseUser.id);
         
-          const responseWithCookies: Response = new Token({}).setCookieTokens(accessToken, refreshToken, res);
+          const responseWithCookies: Response = Token.setCookieTokens(accessToken, refreshToken, res);
         
           try {
             await NotificationsController.createNotification(
@@ -88,7 +88,7 @@ async function signUp(req: Request, res: Response): Promise<Response> {
           .status(401)
           .json({ message: `${username} already exist` });
       } else {
-      
+        //
       }
     }
     
@@ -105,10 +105,10 @@ async function logOut(req: Request, res: Response): Promise<Response> {
   const accessTokenName: TokenType = 'access';
   
   const accessToken = cookies[accessTokenName];
-  const decoded = new Token({}).getDecoded(accessToken);
+  const decoded = Token.getDecoded(accessToken);
   const userId = get(decoded, 'userId');
-  new Token({ userId }).deleteDbRefreshToken();
-  const responseWithoutCookies: Response = new Token({}).removeCookieTokens(res);
+  Token.deleteDbRefreshToken(userId);
+  const responseWithoutCookies: Response = Token.removeCookieTokens(res);
   
   try {
     return responseWithoutCookies

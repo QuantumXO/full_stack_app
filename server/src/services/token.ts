@@ -24,23 +24,11 @@ const accessTokenMaxAge: number = Number(process.env.ACCESS_TOKEN_MAX_AGE);
 const refreshTokenMaxAge: number = Number(process.env.REFRESH_TOKEN_MAX_AGE);
 
 export class Token {
-  private readonly userId: string | undefined;
   
-  constructor({ userId }: ITokenProps) {
-    this.userId = userId;
-  }
-  
-  private throwUserIdError(): void {
-    if (!this.userId) {
-      throw new Error('this.userId not found');
-    }
-  }
-  
-  public get getNewAccessToken(): IGetAccessToken {
-    this.throwUserIdError();
+  public getNewAccessToken(userId: string): IGetAccessToken {
     const token: string = jwt.sign(
       <IJwtPayload>{
-        userId: this.userId,
+        userId,
         type: ACCESS_TOKEN_NAME,
       },
       process.env.TOKEN_SECRET,
@@ -51,7 +39,7 @@ export class Token {
     );
     return {
       token,
-      userId: this.userId,
+      userId,
     };
   }
   
@@ -75,26 +63,24 @@ export class Token {
     }
   }
   
-  public async replaceDbRefreshToken(tokenId: string): Promise<void> {
-    this.throwUserIdError();
-    this.deleteDbRefreshToken();
+  public async replaceDbRefreshToken(tokenId: string, userId: string): Promise<void> {
+    this.deleteDbRefreshToken(userId);
     
     await RefreshTokenModel.create({
       tokenId,
-      userId: this.userId,
+      userId,
     });
   }
   
-  public deleteDbRefreshToken(): void {
-    this.throwUserIdError();
-    RefreshTokenModel.findOneAndRemove({ userId: this.userId }).exec();
+  public deleteDbRefreshToken(userId: string): void {
+    RefreshTokenModel.findOneAndRemove({ userId }).exec();
   }
   
-  public async updateAccessRefreshTokens(): Promise<GetAccessRefreshTokensType> {
-    const accessToken: IGetAccessToken = this.getNewAccessToken;
+  public async updateAccessRefreshTokens(userId: string): Promise<GetAccessRefreshTokensType> {
+    const accessToken: IGetAccessToken = this.getNewAccessToken(userId);
     const refreshToken: IGetRefreshToken = this.getNewRefreshToken;
     
-    await this.replaceDbRefreshToken(refreshToken.id);
+    await this.replaceDbRefreshToken(refreshToken.id, userId);
     
     return {
       access: accessToken.token,
@@ -157,3 +143,7 @@ export class Token {
       .clearCookie(REFRESH_TOKEN_NAME);
   }
 }
+
+const tokenInstance: Token = new Token();
+
+export default <Token>tokenInstance;

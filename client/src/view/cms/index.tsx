@@ -1,7 +1,8 @@
 import React, { ReactElement } from 'react';
-import { axiosInstance } from '../../services/axios';
+import { axiosInstance, httpRequest } from '@services/axios';
 import { Box, Button, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { get } from 'lodash';
 
 interface IProduct {
   id: number;
@@ -14,7 +15,7 @@ function CMS(): ReactElement {
   
   const onAPIRequest = async (): Promise<void> => {
     try {
-      const response = await axiosInstance.get('/api');
+      const response = await httpRequest({ method: 'GET', url: '/api' });
       console.log('response: ', response);
     } catch (e) {
       console.log(e);
@@ -23,28 +24,10 @@ function CMS(): ReactElement {
   
   const getProducts = async (): Promise<void> => {
     try {
-      const response = await axiosInstance.get('/products');
-      setProducts(response?.data.products);
+      const response = await httpRequest({ method: 'GET', url: '/products' });
+      setProducts(get(response, 'data.products', []));
     } catch (e) {
       console.log(e);
-    }
-  };
-  
-  const privateRequest = async (): Promise<void> => {
-    try {
-      const res = await axiosInstance.get('/protected');
-      console.log(res?.data);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-  
-  const publicRequest = async (): Promise<void> => {
-    try {
-      const res = await axiosInstance.get('/public');
-      console.log(res?.data);
-    } catch (e) {
-      console.error(e);
     }
   };
   
@@ -80,20 +63,6 @@ function CMS(): ReactElement {
         {t('CMS page')}
       </Typography>
       <Box sx={{ display: 'flex', gap: '24px' }}>
-        <Button
-          size="medium"
-          variant="contained"
-          onClick={privateRequest}
-        >
-          {'Protected request'}
-        </Button>
-        <Button
-          size="medium"
-          variant="contained"
-          onClick={publicRequest}
-        >
-          {'Public request'}
-        </Button>
         <Button
           size="medium"
           variant="contained"
