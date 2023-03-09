@@ -1,5 +1,4 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestConfig } from 'axios';
-import isOkResponse from './is-ok-response';
 import { get } from 'lodash';
 
 type HttpMethodType = | 'GET' | 'POST' | 'PUT' | 'DELETE' | 'OPTIONS'; // 'PATCH'
@@ -27,6 +26,7 @@ export const axiosInstance: AxiosInstance = axios.create({
 
 const tokenErrors: string[] = ['UnauthorizedError', 'TokenExpiredError'];
 
+// TODO: check that method to auth errors handling (redirect)
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: any) => {

@@ -5,9 +5,12 @@ import bcrypt from 'bcrypt';
 import Token from '@services/token';
 import { ILoginResponseUser } from '@interfaces/common/auth';
 import dotenv from 'dotenv';
-import { get } from 'lodash';
+import { get, size } from 'lodash';
 import NotificationsController from '@controllers/common/notifications';
 import { TokenType } from '@interfaces/common/token';
+import { User } from '@services/validations/auth/sign-up';
+import { validation } from '@services/validations';
+import { getNormalizedResponseBody, responseBodyWithError } from '@services/get-normalized-response-data';
 
 dotenv.config();
 
@@ -73,28 +76,38 @@ async function login(req: Request, res: Response): Promise<Response> {
 }
 
 async function signUp(req: Request, res: Response): Promise<Response> {
-  const { username, password } = req.body;
+  const { username, password, repeatPassword, email } = req.body;
   
   try {
-    const selectedUser: IUser | null = await UserModel
-      .findOne({ userName: username })
-      .exec();
+    const { errors } = await validation(
+      {
+        ValidatorClass: User,
+        fields: {
+          username,
+          password,
+          repeatPassword,
+          email
+        },
+      }
+    );
     
-    if (!username || !password) {
-      return res.status(400).json({ error: 'Incorrect password or username' });
+    if (size(errors)) {
+      return res.status(400).json({ errors });
     } else {
+      const selectedUser: IUser | null = await UserModel
+        .findOne({ userName: username })
+        .exec();
+      
       if (selectedUser) {
         return res
-          .status(401)
-          .json({ message: `${username} already exist` });
+          .status(409)
+          .json(responseBodyWithError(`${username} already exist`));
       } else {
-        //
+        return res
+          .status(200)
+          .json(getNormalizedResponseBody(null, { message: 'SignUp is done! [POST]' }));
       }
     }
-    
-    return res
-      .status(200)
-      .json({ message: 'SignUp is done! [POST]' });
   } catch (e) {
     console.log(e);
   }
@@ -107,7 +120,9 @@ async function logOut(req: Request, res: Response): Promise<Response> {
   const accessToken = cookies[accessTokenName];
   const decoded = Token.getDecoded(accessToken);
   const userId = get(decoded, 'userId');
+  
   Token.deleteDbRefreshToken(userId);
+  
   const responseWithoutCookies: Response = Token.removeCookieTokens(res);
   
   try {

@@ -6,25 +6,32 @@ type FieldsListType = [string, unknown];
   data: {
     list: [],
   },
+  error: 'Some error message',
   someTechInfo: 'message',
 }*/
 
 export function getNormalizedResponseBody(
-  data: ResponseCommonDataType = {},
+  data: ResponseCommonDataType,
   optionalBodyInfo?: ResponseCommonDataType
 ): IResponseBody {
-  const fieldsArr: FieldsListType[] = Object.entries(data);
-  
   const body: IResponseBody = {
     ...optionalBodyInfo,
-    data: { },
   };
   
-  if (fieldsArr.length) {
-    fieldsArr.forEach(([key, value]: FieldsListType): void => {
-      body.data[key] = value;
-    });
+  if (data) {
+    const fieldsArr: FieldsListType[] = Object.entries(data);
+    body.data = {};
+    
+    if (fieldsArr.length) {
+      fieldsArr.forEach(([key, value]: FieldsListType): void => {
+        body.data[key] = value;
+      });
+    }
   }
 
   return body;
+}
+
+export function responseBodyWithError(error: string): IResponseBody {
+  return getNormalizedResponseBody(null, { error });
 }

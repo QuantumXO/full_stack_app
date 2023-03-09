@@ -9,7 +9,7 @@ import { IDbRefreshToken, TokenType } from '@interfaces/common/token';
 
 dotenv.config();
 
-const excludedPaths: string[] = ['/public', '/login', /*'/socket.io/'*/];
+const excludedPaths: string[] = ['/public', '/login', '/sign-up'];
 export const unlessParams: ExpressUnlessParamsType = {
   path: excludedPaths,
 };

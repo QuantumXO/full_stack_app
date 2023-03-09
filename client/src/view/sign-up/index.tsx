@@ -6,24 +6,27 @@ import { axiosInstance } from '@services/axios';
 import { AxiosResponse } from 'axios';
 import { useTranslation } from 'react-i18next';
 import { Typography, Box, TextField, Container, Button, FormControl } from '@mui/material';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler, Validate } from 'react-hook-form';
+import { get } from 'lodash';
 
 interface IFormData {
+  email?: string;
   username?: string;
   password?: string;
-  location?: string;
+  repeatPassword?: string;
 }
 
 interface ISignUpArgs {
   username: string;
+  email: string;
   password: string;
-  location?: string;
+  repeatPassword: string;
 }
 
 export default function SignUp(): ReactElement {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<IFormData>();
+  const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<IFormData>({});
   
   const isAuthorized: boolean = useSelector((state: RootState) => state.common.isAuthorized);
   
@@ -40,7 +43,7 @@ export default function SignUp(): ReactElement {
         '/sign-up',
         formData as ISignUpArgs
       );
-  
+      
       console.log('res: ', res);
     } catch (e) {
       console.log(e);
@@ -48,6 +51,159 @@ export default function SignUp(): ReactElement {
   };
   
   const onClearForm = (): void => reset();
+  
+  const repeatPasswordValidate = (value: string | undefined): string | boolean => {
+    return watch('password') !== value ? 'Your passwords do no match' : true;
+  };
+  
+  function renderFieldError(field: string): ReactElement {
+    return (
+      <Typography
+        style={{
+          display: 'block',
+          minHeight: 21,
+          marginTop: 0,
+          marginBottom: 12,
+          color: '#e74c3c',
+          fontSize: 14,
+      }}
+      >
+        {get(errors, `${field}.message`)}
+      </Typography>
+    );
+  }
+  
+  function renderForm(): ReactElement {
+    const {
+      email: emailError, repeatPassword: repeatPasswordError, password: passwordError, username: usernameError
+    } = errors;
+    return (
+      <Box
+        component="form"
+        noValidate
+        sx={{ mt: 4 }}
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        <TextField
+          required
+          fullWidth
+          id="username"
+          margin="none"
+          label="Username"
+          inputProps={{
+            autoComplete: 'off'
+          }}
+          error={!!usernameError}
+          {...register(
+            'username',
+            {
+              required: {
+                value: true,
+                message: 'Please enter username!'
+              },
+              pattern: {
+                value: /^[a-zA-Z]{3,15}$/gs,
+                message: 'Username must be at least 3 and maximum 15 characters and contain only letters of the ' +
+                  'Latin alphabet',
+              }
+            }
+          )}
+        />
+        {renderFieldError('username')}
+        <TextField
+          fullWidth
+          id="email"
+          type="email"
+          label="Email"
+          margin="none"
+          error={!!emailError}
+          {...register(
+            'email',
+            {
+              required: {
+                value: true,
+                message: 'Please enter email!'
+              },
+              pattern: {
+                value: /\S+@\S+\.\S+/,
+                message: 'Entered value does not match email format'
+              }
+            }
+          )}
+        />
+        {renderFieldError('email')}
+        <TextField
+          required
+          fullWidth
+          id="password"
+          margin="none"
+          type="password"
+          label="Password"
+          error={!!passwordError}
+          inputProps={{
+            autoComplete: 'new-password',
+          }}
+          {...register(
+            'password',
+            {
+              required: {
+                value: true,
+                message: 'Please enter password!'
+              },
+              pattern: {
+                value: /^[^`<>{}\[\]()"']{4,10}$/sg,
+                message: 'Password must include 4 - 10 symbols and should not contain symbols: ` < > { } [ ] ( ) ".'
+              }
+            }
+          )}
+        />
+        {renderFieldError('password')}
+        <TextField
+          required
+          fullWidth
+          type="password"
+          margin="none"
+          id="repeatPassword"
+          label="Repeat password"
+          error={!!repeatPasswordError}
+          inputProps={{
+            autoComplete: 'off'
+          }}
+          {...register(
+            'repeatPassword',
+            {
+              required: {
+                value: true,
+                message: 'Please repeat password!'
+              },
+              validate: repeatPasswordValidate,
+            }
+          )}
+        />
+        {renderFieldError('repeatPassword')}
+        <FormControl
+          margin="normal"
+          style={{ display: 'flex', justifyContent: 'flex-end', flexDirection: 'row' }}
+        >
+          <Button
+            color="inherit"
+            type="button"
+            variant="outlined"
+            onClick={onClearForm}
+          >
+            Clear
+          </Button>
+          <Button
+            sx={{ marginLeft: '24px' }}
+            type="submit"
+            variant="contained"
+          >
+            SignUp
+          </Button>
+        </FormControl>
+      </Box>
+    );
+  }
   
   return (
     <Box className="sign-up" width="100%" padding="0 24px">
@@ -63,71 +219,7 @@ export default function SignUp(): ReactElement {
         component="main"
         maxWidth="xs"
       >
-        <Box
-          component="form"
-          noValidate
-          sx={{ mt: 1 }}
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <TextField
-            required
-            fullWidth
-            id="username"
-            margin="normal"
-            label="Username"
-            inputProps={{
-              autoComplete: 'off'
-            }}
-            error={!!errors.username}
-            // value={formData.username || ''}
-            {...register('username', { required: true })}
-          />
-          <TextField
-            fullWidth
-            id="location"
-            margin="normal"
-            label="Location"
-            type="text"
-            // value={formData.location || ''}
-            {...register('location')}
-          />
-          <TextField
-            required
-            fullWidth
-            id="password"
-            margin="normal"
-            label="Password"
-            type="password"
-            error={!!errors.password}
-            inputProps={{
-              autoComplete: 'new-password',
-            }}
-            // helperText={'This field is required'}
-            // value={formData.password || ''}
-            {...register('password', { required: true })}
-          />
-          <FormControl
-            margin="normal"
-            style={{ display: 'flex', justifyContent: 'flex-end', flexDirection: 'row' }}
-          >
-            <Button
-              color="inherit"
-              type="button"
-              variant="outlined"
-              onClick={onClearForm}
-            >
-              Clear
-            </Button>
-            <Button
-              sx={{ marginLeft: '24px' }}
-              type="submit"
-              variant="contained"
-            >
-              SignUp
-            </Button>
-          </FormControl>
-          <p></p>
-        </Box>
+        {renderForm()}
       </Container>
     </Box>
   );
