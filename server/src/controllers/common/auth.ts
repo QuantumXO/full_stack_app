@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { UserModel } from '@models/users';
-import { IDBCreateNewUser, IUser, ILoginResponseUser, ISignUpResponseUser, IDBUser } from '@interfaces//common/users';
+import { IDBCreateNewUser, ILoginResponseUser, ISignUpResponseUser, IDBUser } from '@interfaces//common/users';
 import bcrypt from 'bcrypt';
 import Token from '@services/token';
 import dotenv from 'dotenv';
