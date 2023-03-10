@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
-import { IUser } from '@interfaces/common/users';
+import { IDBUser } from '@interfaces/common/users';
 
-export const userSchema = new Schema<IUser>({
+export const userSchema = new Schema<IDBUser>({
   userName: {
     type: String,
     required: true,
@@ -9,10 +9,10 @@ export const userSchema = new Schema<IUser>({
     maxLength: 255,
     minLength: 2,
   },
-  location: {
+  email: {
+    required: true,
     type: String,
-    maxLength: 255,
-    minLength: 2,
+    trim: true,
   },
   password: {
     type: String,
@@ -29,4 +29,4 @@ export const userSchema = new Schema<IUser>({
   },
 });
 
-export const UserModel = model<IUser>('users', userSchema);
+export const UserModel = model<IDBUser>('users', userSchema);

@@ -13,9 +13,6 @@ export interface IValidationError {
 export interface IValidationResult {
   errors?: IValidationError[];
 }
-export interface IValidationErrors {
-  errors: IValidationError[];
-}
 
 export async function validation(args: IValidationArgs): Promise<IValidationResult> {
   const { fields, ValidatorClass, validatorOptions } = args;

@@ -1,5 +1,9 @@
 export type NotificationType = 'info' | 'success' | 'error' | 'warning' | 'default';
-export type NotificationEventType = 'USER_LOGIN';
+export enum NotificationsEvents {
+  'USER_LOGIN' = 'USER_LOGIN',
+  'USER_CREATED' = 'USER_CREATED',
+}
+export type NotificationsEventType = keyof typeof NotificationsEvents;
 export interface ICreateNotification {
   userId: string;
   type: NotificationType;
@@ -34,7 +38,7 @@ export interface IDbNotification {
   expireAt?: Date;
 }
 
-export enum NotificationsEvents {
+export enum NotificationsEventsHandlers {
   'READ_NOTIFICATION' = 'notifications:read',
   'GET_NOTIFICATIONS_LIST' = 'notifications:list',
   'CREATE_NOTIFICATION' = 'notifications:create',

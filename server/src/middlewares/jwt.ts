@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { ACCESS_TOKEN_NAME, REFRESH_TOKEN_NAME } from '../constants';
 import dotenv from 'dotenv';
 import Token from '@services/token';
-import customError from '@services/get-custom-error';
+import customError from '@services/custom-error';
 import { Params as ExpressUnlessParamsType, unless } from 'express-unless';
 import { IDbRefreshToken, TokenType } from '@interfaces/common/token';
 

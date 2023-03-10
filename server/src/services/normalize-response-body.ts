@@ -10,7 +10,7 @@ type FieldsListType = [string, unknown];
   someTechInfo: 'message',
 }*/
 
-export function getNormalizedResponseBody(
+export function normalizeResponseBody(
   data: ResponseCommonDataType,
   optionalBodyInfo?: ResponseCommonDataType
 ): IResponseBody {
@@ -33,5 +33,5 @@ export function getNormalizedResponseBody(
 }
 
 export function responseBodyWithError(error: string): IResponseBody {
-  return getNormalizedResponseBody(null, { error });
+  return normalizeResponseBody(null, { error });
 }

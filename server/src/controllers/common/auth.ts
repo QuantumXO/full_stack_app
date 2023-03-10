@@ -1,16 +1,18 @@
 import { Request, Response } from 'express';
 import { UserModel } from '@models/users';
-import { IUser } from '@interfaces//common/users';
+import { IDBCreateNewUser, IUser, ILoginResponseUser, ISignUpResponseUser, IDBUser } from '@interfaces//common/users';
 import bcrypt from 'bcrypt';
 import Token from '@services/token';
-import { ILoginResponseUser } from '@interfaces/common/auth';
 import dotenv from 'dotenv';
 import { get, size } from 'lodash';
 import NotificationsController from '@controllers/common/notifications';
 import { TokenType } from '@interfaces/common/token';
 import { User } from '@services/validations/auth/sign-up';
 import { validation } from '@services/validations';
-import { getNormalizedResponseBody, responseBodyWithError } from '@services/get-normalized-response-data';
+import { normalizeResponseBody, responseBodyWithError } from '@services/normalize-response-body';
+import { NotificationsEvents } from '@interfaces/common/notifications';
+import { USER_PASSWORD_SALT_ROUNDS } from '@src/constants';
+import customError from '@services/custom-error';
 
 dotenv.config();
 
@@ -21,10 +23,10 @@ async function login(req: Request, res: Response): Promise<Response> {
     if (!username || !password) {
       return res.status(400).json({ message: 'username or password is missing' });
     } else {
-      const selectedUser: IUser | null = await UserModel
+      const selectedUser: IDBUser | null = await UserModel
         .findOne({ userName: username })
         .lean()
-        .select('_id userName password location')
+        .select('_id userName password email')
         .exec();
     
       if (selectedUser) {
@@ -38,7 +40,7 @@ async function login(req: Request, res: Response): Promise<Response> {
             id: String(selectedUser._id),
             userName: selectedUser.userName,
             password: selectedUser.password,
-            location: selectedUser.location
+            email: selectedUser.email,
           };
         
           const {
@@ -50,7 +52,7 @@ async function login(req: Request, res: Response): Promise<Response> {
         
           try {
             await NotificationsController.createNotification(
-              'USER_LOGIN',
+              NotificationsEvents.USER_LOGIN,
               { userId: responseUser.id }
             );
           } catch (e) {
@@ -94,7 +96,7 @@ async function signUp(req: Request, res: Response): Promise<Response> {
     if (size(errors)) {
       return res.status(400).json({ errors });
     } else {
-      const selectedUser: IUser | null = await UserModel
+      const selectedUser: IDBUser | null = await UserModel
         .findOne({ userName: username })
         .exec();
       
@@ -103,9 +105,53 @@ async function signUp(req: Request, res: Response): Promise<Response> {
           .status(409)
           .json(responseBodyWithError(`${username} already exist`));
       } else {
-        return res
-          .status(200)
-          .json(getNormalizedResponseBody(null, { message: 'SignUp is done! [POST]' }));
+        try {
+          const hashPassword: string = await bcrypt.hash(password, USER_PASSWORD_SALT_ROUNDS);
+  
+          const newUser: IDBCreateNewUser = {
+            userName: username,
+            password: hashPassword,
+            email
+          };
+          const createdUser = await UserModel.create(newUser);
+          
+          if (createdUser) {
+            const { _id, userName, email, createdAt } = createdUser;
+            const responseUser: ISignUpResponseUser = {
+              id: String(_id),
+              userName,
+              email,
+              createdAt
+            };
+  
+            try {
+              await NotificationsController.createNotification(
+                NotificationsEvents.USER_CREATED,
+                { userId: responseUser.id }
+              );
+            } catch (e) {
+              console.log('e');
+            }
+            
+            const {
+              access: accessToken,
+              refresh: refreshToken
+            } = await Token.updateAccessRefreshTokens(responseUser.id);
+  
+            const responseWithCookies: Response = Token.setCookieTokens(accessToken, refreshToken, res);
+            
+            return responseWithCookies
+              .status(200)
+              .json(normalizeResponseBody(
+                { user: responseUser },
+                { message: 'SignUp is done! [POST]' }
+              ));
+          } else {
+            //
+          }
+        } catch (e) {
+          customError(null, 'bcrypt hash error', true);
+        }
       }
     }
   } catch (e) {

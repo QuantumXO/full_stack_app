@@ -2,10 +2,10 @@ import axios, { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestConfig } f
 import { get } from 'lodash';
 
 type HttpMethodType = | 'GET' | 'POST' | 'PUT' | 'DELETE' | 'OPTIONS'; // 'PATCH'
-export interface IHttpRequestArgs {
+export interface IHttpRequestArgs<DataType> {
   url: string,
   method: HttpMethodType,
-  data?: Record<string, unknown> | null,
+  data?: DataType | Record<string, unknown> | null,
   customInit?: Record<string, string>,
   isPublic?: boolean,
 }
@@ -40,7 +40,7 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-export const httpRequest = async (args: IHttpRequestArgs): Promise<ResponseType> => {
+export const httpRequest = async <T>(args: IHttpRequestArgs<T>): Promise<ResponseType> => {
   const { url, method, data = null, customInit = {}, isPublic = false } = args;
   let urlWithParams: string = url;
   let init: AxiosRequestConfig = {};

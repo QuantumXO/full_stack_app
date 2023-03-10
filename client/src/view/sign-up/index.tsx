@@ -1,13 +1,14 @@
 import { ReactElement, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { RootState } from '@src/store';
-import { axiosInstance } from '@services/axios';
-import { AxiosResponse } from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, setIsAuthorized, setUserData } from '@src/store';
+import { getResponseData, httpRequest, IHttpRequestArgs, ResponseType } from '@services/axios';
 import { useTranslation } from 'react-i18next';
 import { Typography, Box, TextField, Container, Button, FormControl } from '@mui/material';
-import { useForm, SubmitHandler, Validate } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { get } from 'lodash';
+import isOkResponse from '@services/is-ok-response';
+import { Dispatch } from '@reduxjs/toolkit';
 
 interface IFormData {
   email?: string;
@@ -24,6 +25,7 @@ interface ISignUpArgs {
 }
 
 export default function SignUp(): ReactElement {
+  const dispatch: Dispatch = useDispatch();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<IFormData>({});
@@ -39,12 +41,19 @@ export default function SignUp(): ReactElement {
   
   const onSubmit: SubmitHandler<IFormData> = async (formData: IFormData): Promise<void> => {
     try {
-      const res: AxiosResponse = await axiosInstance.post(
-        '/sign-up',
-        formData as ISignUpArgs
-      );
+  
+      const response: ResponseType = await httpRequest<ISignUpArgs>({
+        method: 'POST',
+        url: '/sign-up',
+        data: formData as ISignUpArgs,
+      });
+  
+      if (isOkResponse(response)) {
+        const { user } = getResponseData(response);
+        dispatch(setUserData(user));
+        dispatch(setIsAuthorized(true));
+      }
       
-      console.log('res: ', res);
     } catch (e) {
       console.log(e);
     }

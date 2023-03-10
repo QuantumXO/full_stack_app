@@ -1,14 +1,14 @@
 import { Socket, } from 'socket.io';
 import {
-  ICreateNotification, IDbNotification, INotification, NotificationEventType, NotificationsEvents
+  ICreateNotification, IDbNotification, INotification, NotificationsEventType, NotificationsEventsHandlers
 } from '@interfaces/common/notifications';
 import { NotificationModel } from '@models/common/notifications';
-import customError from '@services/get-custom-error';
+import customError from '@services/custom-error';
 import { ioServer } from '@src/server';
 
 export function registerNotificationsHandlers(socket: Socket): void {
-  socket.on(NotificationsEvents.READ_NOTIFICATION, readNotification);
-  socket.on(NotificationsEvents.GET_NOTIFICATIONS_LIST, getNotifications);
+  socket.on(NotificationsEventsHandlers.READ_NOTIFICATION, readNotification);
+  socket.on(NotificationsEventsHandlers.GET_NOTIFICATIONS_LIST, getNotifications);
 }
 
 async function getNotifications(args: { userId: unknown }): Promise<INotification[]> {
@@ -43,7 +43,7 @@ async function getNotifications(args: { userId: unknown }): Promise<INotificatio
     });
   
     ioServer.emit(
-      NotificationsEvents.GET_NOTIFICATIONS_LIST,
+      NotificationsEventsHandlers.GET_NOTIFICATIONS_LIST,
       {
         notifications: responseNotifications,
         newNotificationsCount,
@@ -88,7 +88,7 @@ async function readNotification(args: { id: string }): Promise<void> {
       .exec()
   
     ioServer.emit(
-      NotificationsEvents.READ_NOTIFICATION,
+      NotificationsEventsHandlers.READ_NOTIFICATION,
       {
         notification: responseNotification,
         newNotificationsCount: unreadNotifications.length,
@@ -100,7 +100,7 @@ async function readNotification(args: { id: string }): Promise<void> {
 }
 
 async function createNotification(
-  eventType: NotificationEventType,
+  eventType: NotificationsEventType,
   params: Record<string, unknown>
 ): Promise<INotification> {
   const { userId } = params as { userId: string };
@@ -142,7 +142,7 @@ async function createNotification(
         expireAt,
       };
       
-      ioServer.emit(NotificationsEvents.CREATE_NOTIFICATION, responseNotification);
+      ioServer.emit(NotificationsEventsHandlers.CREATE_NOTIFICATION, responseNotification);
       
       return responseNotification;
     } else {
