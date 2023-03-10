@@ -11,7 +11,6 @@ export interface ICreateNotification {
   content: string;
   author: string;
   eventType: string;
-  createdAt: Date;
   expireAt?: Date;
 }
 export interface INotification {

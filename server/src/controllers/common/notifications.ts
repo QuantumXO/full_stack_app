@@ -1,6 +1,11 @@
 import { Socket, } from 'socket.io';
 import {
-  ICreateNotification, IDbNotification, INotification, NotificationsEventType, NotificationsEventsHandlers
+  ICreateNotification,
+  IDbNotification,
+  INotification,
+  NotificationsEventType,
+  NotificationsEventsHandlers,
+  NotificationsEvents
 } from '@interfaces/common/notifications';
 import { NotificationModel } from '@models/common/notifications';
 import customError from '@services/custom-error';
@@ -110,7 +115,7 @@ async function createNotification(
   
   try {
     switch (eventType) {
-      case 'USER_LOGIN': {
+      case NotificationsEvents.USER_LOGIN: {
         newNotification = {
           userId,
           eventType,
@@ -118,7 +123,17 @@ async function createNotification(
           author: 'system',
           title: 'Login Success!',
           content: 'You have been successfully logged into platform',
-          createdAt: new Date(),
+        };
+        break;
+      }
+      case NotificationsEvents.USER_CREATED: {
+        newNotification = {
+          userId,
+          eventType,
+          type: 'success',
+          author: 'system',
+          title: 'Registration success!',
+          content: 'Congratulation, your account has been successfully created.',
         };
         break;
       }
