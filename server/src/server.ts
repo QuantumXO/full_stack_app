@@ -19,7 +19,6 @@ const PORT = process.env.PORT || 3001;
 export const httpServer: http.Server = http.createServer(app);
 export const ioServer: Server = createIoServer();
 
-
 const serverStart = async (): Promise<void> => {
   console.clear();
   try {

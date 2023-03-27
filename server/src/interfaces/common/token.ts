@@ -1,4 +1,9 @@
-export type TokenType = 'access' | 'refresh';
+  export enum TokenTypes {
+  access = 'access',
+  refresh = 'refresh',
+}
+
+export type TokenType = keyof typeof TokenTypes;
 
 export interface IGetToken {
   token: string;
@@ -26,5 +31,5 @@ export type GetAccessRefreshTokensType = {
 export interface IDbRefreshToken {
   userId: string;
   tokenId: string;
-  expireAt: Date;
+  createdAt: Date;
 }

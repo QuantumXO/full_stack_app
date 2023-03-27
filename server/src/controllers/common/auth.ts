@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { UserModel } from '@models/users';
-import { IDBCreateNewUser, ILoginResponseUser, ISignUpResponseUser, IDBUser } from '@interfaces//common/users';
+import { IDBCreateNewUser, ILoginResponseUser, ISignUpResponseUser, IDBUser } from '@interfaces/common/users';
 import bcrypt from 'bcrypt';
 import Token from '@services/token';
 import dotenv from 'dotenv';
@@ -39,7 +39,6 @@ async function login(req: Request, res: Response): Promise<Response> {
           const responseUser: ILoginResponseUser = {
             id: String(selectedUser._id),
             userName: selectedUser.userName,
-            password: selectedUser.password,
             email: selectedUser.email,
           };
         

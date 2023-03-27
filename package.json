@@ -9,7 +9,8 @@
   "scripts": {
     "start": "concurrently \"(npm start --prefix client)\" \"(npm run start:nodemon --prefix server)\""
   },
-  "dependencies": {
+  "devDependencies": {
+    "prettier": "2.8.7",
     "concurrently": "7.6.0"
   }
 }

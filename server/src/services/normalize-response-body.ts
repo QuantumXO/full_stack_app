@@ -32,6 +32,6 @@ export function normalizeResponseBody(
   return body;
 }
 
-export function responseBodyWithError(error: string): IResponseBody {
-  return normalizeResponseBody(null, { error });
+export function responseBodyWithError(error: string, data?: ResponseCommonDataType): IResponseBody {
+  return normalizeResponseBody(data, { error });
 }
