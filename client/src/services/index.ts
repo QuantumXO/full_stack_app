@@ -1,4 +1,4 @@
-import isOkResponse from '@services/is-ok-response';
+import isOkResponse from '@services/common/is-ok-response';
 
 // @ts-ignore
 window.log = console.log;

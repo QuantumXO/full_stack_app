@@ -3,7 +3,7 @@ import { Slice } from '@reduxjs/toolkit/src/createSlice';
 import jsCookie from 'js-cookie';
 import { ACCESS_TOKEN_NAME } from '../constants';
 import { IUser } from '@models/common/users';
-import getJWTPayload from '@services/get-jwt-payload';
+import getJWTPayload from '@services/common/get-jwt-payload';
 
 interface ICommonState {
   isAuthorized: boolean;

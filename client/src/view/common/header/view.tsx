@@ -2,10 +2,11 @@ import { AppBar, Box, Button, CssBaseline, Link, Toolbar } from '@mui/material';
 import React, { ReactElement } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, setIsAuthorized } from '@src/store';
-import { axiosInstance } from '@services/axios';
+import { axiosInstance } from '@services/common/axios';
 import { Dispatch } from '@reduxjs/toolkit';
 import { Link as RouterLink } from 'react-router-dom';
 import Notifications from './components/notifications';
+import link from '@services/link';
 
 export function Header(): ReactElement {
   const dispatch: Dispatch = useDispatch();
@@ -97,14 +98,14 @@ export function Header(): ReactElement {
               Home
             </Link>
             <Link
-              to="/cms"
+              to={link.getUrl.admin()}
               variant="button"
               color="#fff"
               underline="none"
               sx={{ my: 1, mx: 1.5 }}
               component={RouterLink}
             >
-              CMS
+              Admin
             </Link>
           </nav>
           {renderAuthButtons()}

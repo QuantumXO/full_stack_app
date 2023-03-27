@@ -2,13 +2,14 @@ import { ReactElement, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, setIsAuthorized, setUserData } from '@src/store';
-import { getResponseData, httpRequest, IHttpRequestArgs, ResponseType } from '@services/axios';
+import { getResponseData, httpRequest, IHttpRequestArgs, ResponseType } from '@services/common/axios';
 import { useTranslation } from 'react-i18next';
 import { Typography, Box, TextField, Container, Button, FormControl } from '@mui/material';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { get } from 'lodash';
-import isOkResponse from '@services/is-ok-response';
+import isOkResponse from '@services/common/is-ok-response';
 import { Dispatch } from '@reduxjs/toolkit';
+import link from '@services/link';
 
 interface IFormData {
   email?: string;
@@ -34,7 +35,7 @@ export default function SignUp(): ReactElement {
   
   useEffect(() => {
     if (isAuthorized) {
-      navigate('/cms');
+      navigate(link.getUrl.admin());
       console.log('redirected from /sign-up');
     }
   }, [isAuthorized]);

@@ -1,10 +1,11 @@
 import { ChangeEvent, FormEvent, ReactElement, useEffect, useState } from 'react';
 import { NavigateFunction, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState, setIsAuthorized, setUserData } from '../../store';
-import { axiosInstance } from '../../services/axios';
+import { RootState, setIsAuthorized, setUserData } from '@src/store';
+import { axiosInstance } from '@services/common/axios';
 import { Dispatch } from '@reduxjs/toolkit';
 import { Box, Button, Container, FormControl, TextField, Typography } from '@mui/material';
+import link from '@services/link';
 
 interface ILoginData {
   username?: string;
@@ -21,7 +22,7 @@ function Login(): ReactElement {
   
   useEffect((): void => {
     if (isAuthorized) {
-      navigate('/cms');
+      navigate(link.getUrl.admin());
       console.log('redirected from /login');
     }
   }, [isAuthorized]);

@@ -2,9 +2,9 @@ import React, { memo, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, setUserData } from '@src/store';
 import { Navigate } from 'react-router-dom';
-import { getResponseData, httpRequest } from '@services/axios';
+import { getResponseData, httpRequest } from '@services/common/axios';
 import { IUser } from '@models/common/users';
-import isOkResponse from '@services/is-ok-response';
+import isOkResponse from '@services/common/is-ok-response';
 import { Dispatch } from '@reduxjs/toolkit';
 
 interface IProtectedRoute {

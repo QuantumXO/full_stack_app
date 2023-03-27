@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { IDBUser, IUser } from '@interfaces/common/users';
-import { UserModel } from '@models/users';
+import { UserModel } from '@models/common/users';
 import { normalizeResponseBody } from '@services/normalize-response-body';
 
 export interface IGetUserResponseUser {
