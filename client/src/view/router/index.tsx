@@ -9,7 +9,7 @@ const Home = lazy(() => import('@view/home'));
 const Admin = lazy(() => import('@view/admin'));
 const Login = lazy(() => import('@view/login'));
 const SignUp = lazy(() => import('@view/sign-up'));
-const Todo = lazy(() => import('@view/todo'));
+const Todos = lazy(() => import('@view/todo-list'));
 
 const router: RemixRouter = createBrowserRouter([
   {
@@ -23,7 +23,7 @@ const router: RemixRouter = createBrowserRouter([
       // { path: 'cms', element: <CMS /> },
       { path: 'login', element: <Login /> },
       { path: 'sign-up', element: <SignUp /> },
-      { path: 'todo', element: <Todo /> },
+      { path: 'todo', element: <Todos /> },
     ]
   },
   {

@@ -1,0 +1,11 @@
+
+.todo--list.page {
+  .dragging--over {
+    transition: background-color .1s ease-in-out;
+    background-color: #f8f8f8;
+    .todo:not(.dragging) {
+      //opacity: .3;
+      //background-color: #efefef;
+    }
+  }
+}

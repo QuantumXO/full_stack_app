@@ -1,15 +1,22 @@
 import { ReactElement } from 'react';
 import { ITodo } from '@models/todo';
-import { Box, Container, styled, Typography, Checkbox, Button } from '@mui/material';
-import { Draggable, DraggableProvided } from 'react-beautiful-dnd';
+import { Box, styled, Typography, Checkbox, Button } from '@mui/material';
+import { Draggable, DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import cx from 'classnames';
 import DeleteIcon from '@mui/icons-material/Delete';
 import moment from 'moment';
+import EditIcon from '@mui/icons-material/Edit';
 
-export interface IProps extends ITodo { }
+export interface IProps extends ITodo {
+  index: number;
+  isSelected: boolean;
+  onSelect: (id: string) => void;
+  onDelete: (id: string) => void;
+}
 
 const Wrapper = styled('div')({
-  padding: '12px 0',
+  padding: '12px 0 12px 24px',
+  backgroundColor: '#ffffff',
   borderBottom: '2px solid transparent',
   '&.low': {
     borderBottomColor: '#eaeaea',
@@ -39,20 +46,32 @@ const PriorityIcon = styled('span')({
 });
 
 export function Todo(props: IProps): ReactElement {
-  const { id, priority, position, title, content, createdAt } = props;
+  const { id, priority, index, title, content, createdAt, onSelect, isSelected, onDelete } = props;
+  
+  function onHandleSelect(): void {
+    onSelect(id);
+  }
+  
+  function onHandleDelete() {
+    onDelete(id);
+  }
+  
   return (
     <Draggable
-      index={position}
+      index={index}
       draggableId={id}
     >
-      {(provided: DraggableProvided): ReactElement => {
+      {(provided: DraggableProvided, snapshot: DraggableStateSnapshot): ReactElement => {
         const { innerRef, draggableProps, dragHandleProps } = provided;
         return (
           <Wrapper
-            ref={innerRef}
             {...draggableProps}
             {...dragHandleProps}
-            className={cx('todo', priority)}
+            ref={innerRef}
+            className={cx(
+              'todo', priority,
+              { dragging: snapshot.isDragging }
+            )}
           >
             <div>
               <Typography
@@ -91,10 +110,13 @@ export function Todo(props: IProps): ReactElement {
                   display: 'inline-flex'
                 }}
               >
-                <Checkbox onChange={undefined}/>
-                <Button color="inherit">
-                  <DeleteIcon fontSize="large" />
+                <Button color="inherit" onClick={undefined}>
+                  <EditIcon fontSize="medium" />
                 </Button>
+                <Button color="inherit" onClick={onHandleDelete}>
+                  <DeleteIcon fontSize="medium" />
+                </Button>
+                <Checkbox checked={isSelected} onChange={onHandleSelect}/>
               </Box>
             </div>
           </Wrapper>
